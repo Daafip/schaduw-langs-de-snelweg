@@ -1,0 +1,51 @@
+# Phase 0/1 prototype config: 5 Dutch highway rest areas.
+# Run with:  pixi run shaduw run --config configs/nl-prototype.toml
+# Relative paths resolve against this file's directory.
+
+name = "nl-prototype"
+country = "NL"
+cache_dir = "../cache"
+
+[stops]
+seed_path = "seeds/nl-prototype.geojson"
+parking_buffer_m = 75.0   # fallback buffer when no OSM polygon is found
+aoi_buffer_m = 30.0       # trees next to the parking cast shade onto it
+use_overpass = true
+
+[stac]
+url = "https://earth-search.aws.element84.com/v1"   # no account needed
+collection = "sentinel-2-l2a"
+max_cloud_cover = 30.0
+years_back = 2
+resolution = 10.0
+max_items_per_season = 12
+
+[canopy]
+source = "meta"                 # Meta/WRI global canopy height, 1 m, AWS Open Data
+tree_height_threshold_m = 3.0
+resolution = 1.0                # shadow-model grid; use 10.0 with source = "eth"
+# Alternatives:
+# source = "eth"    -> ETH Global Canopy Height 2020 (10 m; host can be flaky)
+# source = "local"  -> local_path = "path/to/chm.tif"
+
+[shadow]
+date = "06-21"        # summer solstice
+hours = [12, 15]      # local clock hours to model; 15h is the headline metric
+timezone = "Europe/Amsterdam"
+self_shade_height_m = 2.0
+
+[detection]
+brightness_threshold = 0.08   # (R+G+B+NIR)/4 below this = shadow (~10:30)
+
+[score]
+w_modeled_15h = 0.5
+w_tree_fraction = 0.3
+w_detected_summer = 0.2
+bound_partial = 0.15   # score below this -> "none"
+bound_good = 0.40      # score above this -> "good"
+
+[output]
+directory = "../output"
+geoparquet = "stops_shade.parquet"
+geopackage = "stops_shade.gpkg"
+map_html = "stops_shade_map.html"

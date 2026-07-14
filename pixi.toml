@@ -1,7 +1,7 @@
 [workspace]
-name = "Python_package_template"
-version = "0.0.1"
-description = "Python package template"
+name = "shaduw-langs-de-snelweg"
+version = "0.1.0"
+description = "Shade detection at roadside stops (EU) from open satellite data"
 channels = ["conda-forge"]
 platforms = ["win-64", "linux-64", "osx-64"]
 readme = "README.md"
@@ -12,10 +12,15 @@ license-file = "LICENSE"
 # Installation
 install = "pre-commit install"
 
+# Pipeline
+run = "shaduw run --config configs/nl-prototype.toml"
+discover = "shaduw discover --country NL --out configs/seeds/nl-discovered.geojson"
+test = "pytest test -v"
+
 # Docs
 quartodoc-build = { cmd = "quartodoc build && rm objects.json", cwd = "docs" ,inputs = [
     "docs/_quarto.yml",
-    "src/Python_package_template",
+    "src/shaduw_langs_de_snelweg",
     ],outputs = [
     "docs/reference/"
     ]}
@@ -35,29 +40,44 @@ pre-commit = "pre-commit run --all-files"
     #"E501",  # Line too long
     #"F401",  # Unused import
     #"F403",  # 'from module import *' used; unable to detect undefined names
-    #"F405",  # Name may be undefined, or defined from star imports: module
+    #"F405",  # Name may be undefined, or defined from star imports: define
     #"F841",  # Local variable name is assigned to but never used
     #"T201",  # Use of print statement (use print() function instead)
 #]
 
 [dependencies]
 python = ">=3.11"
-ipykernel ="*"
-ipywidgets ="*"
-matplotlib ="*"
-nbclient ="*"
-nbformat ="*"
-numpy ="*"
-openpyxl = "*"
-pandas ="*"
+ipykernel = "*"
+ipywidgets = "*"
+matplotlib = "*"
+nbclient = "*"
+nbformat = "*"
+numpy = "*"
+pandas = "*"
 pre-commit = "*"
-pytest ="*"
+pytest = "*"
 pytest-cov = "*"
 pydantic = ">=2.12.4,<3"
 quarto = ">=1.5.57"
 quartodoc = ">=0.9.1"
 ruff = ">=0.8.1"
 tqdm = "*"
+# Geo / pipeline stack
+geopandas = ">=1.0"
+shapely = ">=2.0"
+rioxarray = "*"
+rasterio = "*"
+xarray = "*"
+pystac-client = "*"
+odc-stac = "*"
+pvlib = "*"
+folium = "*"
+pyarrow = "*"
+python-duckdb = "*"
+requests = "*"
+# modern sqlite builds depend on libsqlite instead of bundling an old lib
+# (the solver otherwise picks sqlite 3.32 via proj, breaking python's sqlite3)
+sqlite = ">=3.46"
 
 [pypi-dependencies]
-python_package_template = { path = "src", editable = true }
+shaduw_langs_de_snelweg = { path = "src", editable = true }

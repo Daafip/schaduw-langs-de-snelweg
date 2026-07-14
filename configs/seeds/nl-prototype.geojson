@@ -1,0 +1,32 @@
+{
+  "type": "FeatureCollection",
+  "name": "nl-prototype-seeds",
+  "description": "Phase 0 seed stops: real Dutch highway rest areas (verzorgingsplaatsen) from OSM. Point seeds are resolved to parking polygons via Overpass at runtime. Replace or extend with stops you know personally.",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "stop_id": "osm-way-84069111", "name": "Uilengoor (A1)" },
+      "geometry": { "type": "Point", "coordinates": [5.54545, 52.16537] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "stop_id": "osm-way-438615192", "name": "Korte Langesteijn" },
+      "geometry": { "type": "Point", "coordinates": [4.61721, 51.83299] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "stop_id": "osm-way-490680589", "name": "Ronduit (A1)" },
+      "geometry": { "type": "Point", "coordinates": [5.17720, 52.29425] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "stop_id": "osm-way-608036225", "name": "Oldenaller (A28)" },
+      "geometry": { "type": "Point", "coordinates": [5.49297, 52.24866] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "stop_id": "osm-way-664516138", "name": "De Mark (A2)" },
+      "geometry": { "type": "Point", "coordinates": [5.29706, 51.85871] }
+    }
+  ]
+}

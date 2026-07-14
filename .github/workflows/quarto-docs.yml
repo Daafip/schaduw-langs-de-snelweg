@@ -24,19 +24,19 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
         with:
-          path: python_package_template
+          path: shaduw-langs-de-snelweg
 
       - uses: prefix-dev/setup-pixi@v0.8.1
         with:
-          manifest-path: python_package_template/pixi.toml
+          manifest-path: shaduw-langs-de-snelweg/pixi.toml
           pixi-version: "latest"
 
       - name: Check Quarto installation and all engines
-        working-directory: python_package_template
+        working-directory: shaduw-langs-de-snelweg
         run: pixi run quarto-check
 
       - name: Render Quarto Project
-        working-directory: python_package_template
+        working-directory: shaduw-langs-de-snelweg
         run: pixi run quarto-render
 
       - name: Publish Quarto Project
@@ -44,6 +44,6 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: python_package_template/docs/_site
+          publish_dir: shaduw-langs-de-snelweg/docs/_site
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

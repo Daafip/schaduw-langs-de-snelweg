@@ -3,7 +3,7 @@ project:
   type: website
 
 website:
-  title: "Python_package_template"
+  title: "shaduw-langs-de-snelweg"
   navbar:
     left:
       - text: "Examples"
@@ -13,7 +13,7 @@ website:
         file: reference/index.qmd
     right:
       - icon: github
-        href: https://github.com/HKV-products-services/python_package_template
+        href: https://github.com/HKV-products-services/shaduw-langs-de-snelweg
         aria-label: GitHub
 format:
   html:
@@ -24,7 +24,7 @@ quartodoc:
   style: pkgdown
   dir: reference
   title: API Reference
-  package: python_package_template
+  package: shaduw_langs_de_snelweg
   parser: numpy
   dynamic: True
   rewrite_all_pages: True

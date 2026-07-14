@@ -1,68 +1,80 @@
-# Python package template [Pixi]
+# Shaduw langs de snelweg
 
-[Pixi](https://pixi.prefix.dev/latest/) manages packages broarder sence and thus replaces `conda`. [UV](https://docs.astral.sh/uv/) is a package which is a replacement for `pip` in package managing for python. The alternative python package template for uv can be found at [HKV-products-services/python_package_template_uv](https://github.com/HKV-products-services/python_package_template_uv). Depending on your needs one is more suited than the other.
+Shade detection at roadside stops (EU) from open satellite data. For stopping
+places along highways (rest areas, service stations, parkings) the pipeline
+estimates **how shaded each stop is**, including seasonal variation — think of
+a parked car with a baby in it on a summer afternoon.
 
-This template package contains core functionality for a python package, developed to showcase and speed up the process of developing a python package. This Python package template is developed by HKV, though based heavily on other open source projects and is published under the GNU GPL-3 license.
+Design and rationale: [shade-detection-pipeline-plan.md](shade-detection-pipeline-plan.md).
 
-## Configuring the template (remove before publishing)
+## How it works
 
-### Naming
+Two complementary signals per stop (Sentinel-2 only sees ~10:30 shadows, so
+shadows alone are not enough):
 
-The current package name is `python_package_template` and `# Python package template`, if you search for this in your IDE (e.g. VS Code) you can replace these with your given name.
+1. **Detected shadow** — dark, cloud-free pixels in seasonal Sentinel-2 L2A
+   median composites (AWS earth-search STAC, no account needed).
+2. **Modeled shadow** — canopy height (Meta/WRI global canopy height, 1 m COG
+   tiles on AWS Open Data; alternatively ETH 2020 10 m or a local GeoTIFF) +
+   sun position (`pvlib`) → ray-marched shadow footprint for any date/time,
+   e.g. 15:00 on the summer solstice (the headline metric).
 
-### Pre-commit
+Seasonal NDVI (summer vs. winter) additionally shows whether trees are
+deciduous — shade in summer, sun in winter, exactly what you want.
 
-This repo has an example pre-commit configuration in `.pre-commit-config.yaml`.
-Depending on your needs you might want to uncomment certain sections.
-Let us know by making an issue if we missed a useful pre-commit.
-Use `pre-commit install --hook-type pre-commit --hook-type pre-push` to automatically run pre-commit.
+Everything is combined into a 0–1 `shade_score` and a `none`/`partial`/`good`
+class, written as **GeoParquet** + **GeoPackage** + a **Folium HTML map**.
 
-### GitHub Tests
-
-In the folder `.github` there are four workflows which run automatically.
-You will need to adjust these depending on your needs.
-
-### Pixi
-
-Read bellow for more information on pixi and a quick guideline you can include in your project.
-
-## Getting started
-
-### Using install (in future)
-
-run `pip install Python_package_template`
-
-### developing with pixi
-
-To manage the environment we use Pixi.
-
-<details>
-<summary>windows</summary>
-
-```powershell
-iwr -useb https://pixi.sh/install.ps1 | iex
-```
-
-</details>
-
-<details>
-<summary>Linux/Mac</summary>
+## Usage
 
 ```bash
-curl -fsSL https://pixi.sh/install.sh | bash
+pixi install
+
+# run the prototype (5 Dutch rest areas)
+pixi run shaduw run --config configs/nl-prototype.toml
+
+# or explicitly
+pixi run shaduw run --config configs/nl-prototype.toml --limit 1 --force
+
+# discover all rest/service areas in a country as a new seed file (Phase 2)
+pixi run shaduw discover --country NL --out configs/seeds/nl-discovered.geojson
 ```
 
-</details>
+One stop = one unit of work; per-stop results are cached in `cache/` so
+interrupted runs resume where they left off (`--force` recomputes). Outputs
+land in `output/`.
 
-#### installing
+### Configuration
 
-With the `Pixi` command in powershell install the python environment:
+One TOML file per run, see the documented example
+[configs/nl-prototype.toml](configs/nl-prototype.toml): seed stops (GeoJSON
+points or polygons), STAC settings, canopy source, shadow model date/hours,
+score weights and output paths.
+
+### Output schema (main table)
+
+One row per stop: `stop_id`, `name`, `country`, `geometry` (parking polygon),
+`centroid`, `ndvi_summer/winter/delta`, `tree_fraction`,
+`mean_canopy_height`, `shadow_frac_detected_{djf,mam,jja,son}`,
+`shadow_frac_modeled_{12h,15h}`, `shade_score`, `shade_class`,
+`n_scenes_used`, `processed_at`.
+
+## Known limitations
+
+- 10 m Sentinel-2 pixels describe the *stop*, not an individual parking spot.
+- Detected shadows are morning-only (~10:30); afternoons come from the model.
+- Canopy layers have a vintage (Meta/WRI ~2018-2020 imagery, ETH 2020) —
+  recently felled/planted trees are missed.
+- Winter composites can be thin in NW Europe; check `n_scenes_used`.
+- Buildings/carports also give shade but are not in canopy models (yet).
+
+## Development
 
 ```bash
- cd ../python_package_template
- pixi install
+pixi run test        # pytest (no network needed)
+pixi run pre-commit  # lint
+pixi run docs        # quarto docs preview
 ```
 
-The `pixi.lock` file loads the correct packages and downloads to the `.pixi` file, you can use this environment in developing and resting.
-
-For questions about how to use this package contact `dupuits@hkv.nl` or `haasnoot@hkv.nl`.
+Developed by HKV, published under the GNU GPL-3 license. Questions:
+`haasnoot@hkv.nl`.
