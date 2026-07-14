@@ -6,15 +6,17 @@ website:
   title: "shaduw-langs-de-snelweg"
   navbar:
     left:
-      - text: "Examples"
-        menu:
-          - examples/notebooks/introduction.ipynb
-      - text: "Python API"
-        file: reference/index.qmd
+    - text: "Examples"
+      menu:
+      - examples/notebooks/introduction.ipynb
+    - text: map
+      href: examples/stops_shade_map_PoC.html
+    - text: "Python API"
+      file: reference/index.qmd
     right:
-      - icon: github
-        href: https://github.com/HKV-products-services/shaduw-langs-de-snelweg
-        aria-label: GitHub
+    - icon: github
+      href: https://github.com/HKV-products-services/shaduw-langs-de-snelweg
+      aria-label: GitHub
 format:
   html:
     theme: cosmo
