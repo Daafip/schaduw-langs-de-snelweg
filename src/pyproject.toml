@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "python_package_template/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["python_package_template"]
+
+[project]
+name = "python_package_template"
+version = "0.0.1"
+description = "Python package template"
+readme = "README.md"
+license = {text = "GNU-GPL V3"}
+authors = [
+  { name = "Guy Dupuits"},
+  { name = "David Haasnoot"},
+]
+
+dependencies = [
+  "numpy",
+  "pydantic"
+]
+
+[project.urls]
+Documentation = "https://hkv-products-services.github.io/python_package_template"
+Source = "https://github.com/HKV-products-services/python_package_template"

@@ -1,0 +1,63 @@
+[workspace]
+name = "Python_package_template"
+version = "0.0.1"
+description = "Python package template"
+channels = ["conda-forge"]
+platforms = ["win-64", "linux-64", "osx-64"]
+readme = "README.md"
+license = "GPL-3.0"
+license-file = "LICENSE"
+
+[tasks]
+# Installation
+install = "pre-commit install"
+
+# Docs
+quartodoc-build = { cmd = "quartodoc build && rm objects.json", cwd = "docs" ,inputs = [
+    "docs/_quarto.yml",
+    "src/Python_package_template",
+    ],outputs = [
+    "docs/reference/"
+    ]}
+quarto-preview = { cmd = "export QUARTO_PYTHON=python && quarto preview docs", depends-on = [
+    "quartodoc-build",
+] }
+quarto-check = { cmd = "quarto check all", depends-on = ["quartodoc-build"] }
+quarto-render = { cmd = "export QUARTO_PYTHON=python && quarto render docs --to html --execute", depends-on = [
+    "quartodoc-build",
+] }
+docs = { depends-on = ["quarto-preview"] }
+pre-commit = "pre-commit run --all-files"
+
+[tool.ruff]
+# Ruff configuration, see https://docs.astral.sh/ruff/configuration/
+#lint.ignore = [
+    #"E501",  # Line too long
+    #"F401",  # Unused import
+    #"F403",  # 'from module import *' used; unable to detect undefined names
+    #"F405",  # Name may be undefined, or defined from star imports: module
+    #"F841",  # Local variable name is assigned to but never used
+    #"T201",  # Use of print statement (use print() function instead)
+#]
+
+[dependencies]
+python = ">=3.11"
+ipykernel ="*"
+ipywidgets ="*"
+matplotlib ="*"
+nbclient ="*"
+nbformat ="*"
+numpy ="*"
+openpyxl = "*"
+pandas ="*"
+pre-commit = "*"
+pytest ="*"
+pytest-cov = "*"
+pydantic = ">=2.12.4,<3"
+quarto = ">=1.5.57"
+quartodoc = ">=0.9.1"
+ruff = ">=0.8.1"
+tqdm = "*"
+
+[pypi-dependencies]
+python_package_template = { path = "src", editable = true }

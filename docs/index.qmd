@@ -1,0 +1,5 @@
+---
+title: "Python_package_template"
+---
+
+This package contains a template for python projects. This is developed by HKV and is published under the GNU GPL-3 license.

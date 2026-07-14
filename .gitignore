@@ -1,0 +1,19 @@
+# python
+dist
+.ipynb_checkpoints
+__pycache__
+.pytest_cache
+__hidden__*
+*.pyc
+# auto generated pixi
+docs/docs
+docs/reference
+# Excel ongein
+~$*.xlsx
+# pixi
+.pixi
+*.egg-info
+.quarto/*
+# vscode
+.vscode
+/docs/_site

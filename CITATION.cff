@@ -1,0 +1,18 @@
+# YAML 1.2
+---
+authors:
+  -
+    affiliation: "HKV lijn in water"
+    family-names: Dupuits
+    given-names: Guy
+  -
+    affiliation: "HKV lijn in water"
+    family-names: Haasnoot
+    given-names: David
+
+cff-version: "0.0.1"
+keywords:
+  - Waterveiligheid
+license: "GPL-3.0-or-later"
+message: "If you use this software, please cite it using these metadata."
+title: python_package_template

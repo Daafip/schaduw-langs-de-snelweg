@@ -1,0 +1,36 @@
+---
+project:
+  type: website
+
+website:
+  title: "Python_package_template"
+  navbar:
+    left:
+      - text: "Examples"
+        menu:
+          - examples/notebooks/introduction.ipynb
+      - text: "Python API"
+        file: reference/index.qmd
+    right:
+      - icon: github
+        href: https://github.com/HKV-products-services/python_package_template
+        aria-label: GitHub
+format:
+  html:
+    theme: cosmo
+    toc: true
+
+quartodoc:
+  style: pkgdown
+  dir: reference
+  title: API Reference
+  package: python_package_template
+  parser: numpy
+  dynamic: True
+  rewrite_all_pages: True
+  options:
+    include_inherited: true
+    include_empty: true
+    include_attributes: true
+    include_classes: true
+    include_functions: true
