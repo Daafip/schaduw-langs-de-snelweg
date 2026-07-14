@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Introduction: shadow model demo – shaduw-langs-de-snelweg</title>
+<title>pipelineconfig – shaduw-langs-de-snelweg</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -57,22 +57,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../../">
-<script src="../../site_libs/quarto-html/quarto.js"></script>
-<script src="../../site_libs/quarto-html/popper.min.js"></script>
-<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -111,7 +111,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../../index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">shaduw-langs-de-snelweg</span>
     </a>
   </div>
@@ -127,13 +127,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-examples">    
         <li>
-    <a class="dropdown-item" href="../../examples/notebooks/introduction.html">
+    <a class="dropdown-item" href="../examples/notebooks/introduction.html">
  <span class="dropdown-text">Introduction: shadow model demo</span></a>
   </li>  
     </ul>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="../../reference/index.html"> 
+    <a class="nav-link" href="../reference/index.html"> 
 <span class="menu-text">Python API</span></a>
   </li>  
 </ul>
@@ -154,64 +154,84 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#shaduw_langs_de_snelweg.PipelineConfig" id="toc-shaduw_langs_de_snelweg.PipelineConfig" class="nav-link active" data-scroll-target="#shaduw_langs_de_snelweg.PipelineConfig">PipelineConfig</a>
+  <ul class="collapse">
+  <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Introduction: shadow model demo</h1>
-</div>
 
 
 
-<div class="quarto-title-meta">
+<section id="shaduw_langs_de_snelweg.PipelineConfig" class="level1">
+<h1>PipelineConfig</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>PipelineConfig()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Top-level pipeline configuration (one TOML file).</p>
+<section id="attributes" class="level2">
+<h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#shaduw_langs_de_snelweg.config.PipelineConfig.cache_dir">cache_dir</a></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><a href="#shaduw_langs_de_snelweg.config.PipelineConfig.canopy">canopy</a></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><a href="#shaduw_langs_de_snelweg.config.PipelineConfig.country">country</a></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><a href="#shaduw_langs_de_snelweg.config.PipelineConfig.detection">detection</a></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><a href="#shaduw_langs_de_snelweg.config.PipelineConfig.name">name</a></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><a href="#shaduw_langs_de_snelweg.config.PipelineConfig.output">output</a></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><a href="#shaduw_langs_de_snelweg.config.PipelineConfig.score">score</a></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><a href="#shaduw_langs_de_snelweg.config.PipelineConfig.shadow">shadow</a></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><a href="#shaduw_langs_de_snelweg.config.PipelineConfig.stac">stac</a></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><a href="#shaduw_langs_de_snelweg.config.PipelineConfig.stops">stops</a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 
-    
-  
-    
-  </div>
-  
 
-
-</header>
-
-
-<p>The pipeline’s headline metric is the <strong>modeled shadow fraction</strong>: canopy height + sun position -&gt; shadow footprint at any date/time. This notebook demonstrates the shadow caster on a synthetic canopy, no downloads needed.</p>
-<p>For the full pipeline run <code>pixi run shaduw run --config configs/nl-prototype.toml</code>.</p>
-<div id="1" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shaduw_langs_de_snelweg.shadow <span class="im">import</span> cast_shadow_mask</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="2" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Synthetic 1 m canopy: a row of 12 m trees south of a bare parking</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>chm <span class="op">=</span> np.zeros((<span class="dv">80</span>, <span class="dv">80</span>), dtype<span class="op">=</span><span class="st">"float32"</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>chm[<span class="dv">50</span>:<span class="dv">56</span>, <span class="dv">20</span>:<span class="dv">60</span>] <span class="op">=</span> <span class="fl">12.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="3" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Summer afternoon: sun in the southwest, 40 degrees up</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>shadow <span class="op">=</span> cast_shadow_mask(chm, resolution<span class="op">=</span><span class="fl">1.0</span>, azimuth_deg<span class="op">=</span><span class="fl">230.0</span>, elevation_deg<span class="op">=</span><span class="fl">40.0</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].imshow(chm, cmap<span class="op">=</span><span class="st">"Greens"</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">"Canopy height (m)"</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].imshow(shadow, cmap<span class="op">=</span><span class="st">"gray_r"</span>)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">"Modeled shadow footprint"</span>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="introduction_files/figure-html/cell-4-output-1.png" width="950" height="494" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-
-
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

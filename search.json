@@ -2,50 +2,57 @@
   {
     "objectID": "examples/notebooks/introduction.html",
     "href": "examples/notebooks/introduction.html",
-    "title": "Introduction to Python_package_template",
+    "title": "Introduction: shadow model demo",
     "section": "",
-    "text": "This is an example of how the documentation could work\n\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom python_package_template import Example\n\n\nexample = Example(factor=2)\nresult = example.calculation(np.array([1, 2, 3]), np.array([4, 5, 6]))\n\n\nresult\n\narray([25., 49., 81.])\n\n\n\nplt.title(\"Example showing the documentation \")\nplt.plot(result);"
+    "text": "The pipeline’s headline metric is the modeled shadow fraction: canopy height + sun position -&gt; shadow footprint at any date/time. This notebook demonstrates the shadow caster on a synthetic canopy, no downloads needed.\nFor the full pipeline run pixi run shaduw run --config configs/nl-prototype.toml.\n\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nfrom shaduw_langs_de_snelweg.shadow import cast_shadow_mask\n\n\n# Synthetic 1 m canopy: a row of 12 m trees south of a bare parking\nchm = np.zeros((80, 80), dtype=\"float32\")\nchm[50:56, 20:60] = 12.0\n\n\n# Summer afternoon: sun in the southwest, 40 degrees up\nshadow = cast_shadow_mask(chm, resolution=1.0, azimuth_deg=230.0, elevation_deg=40.0)\n\nfig, axes = plt.subplots(1, 2, figsize=(10, 5))\naxes[0].imshow(chm, cmap=\"Greens\")\naxes[0].set_title(\"Canopy height (m)\")\naxes[1].imshow(shadow, cmap=\"gray_r\")\naxes[1].set_title(\"Modeled shadow footprint\")\nplt.tight_layout()"
   },
   {
     "objectID": "reference/index.html",
     "href": "reference/index.html",
     "title": "API Reference",
     "section": "",
-    "text": "Example\nExample class"
+    "text": "Shade detection at roadside stops (EU) from open satellite data.\n\n\n\nPipelineConfig\nTop-level pipeline configuration (one TOML file).\n\n\nload_config\nLoad a :class:PipelineConfig from a TOML file.\n\n\nrun_pipeline\nRun the pipeline for all stops in the config; returns the result table."
   },
   {
-    "objectID": "reference/index.html#python_package_template",
-    "href": "reference/index.html#python_package_template",
+    "objectID": "reference/index.html#shaduw_langs_de_snelweg",
+    "href": "reference/index.html#shaduw_langs_de_snelweg",
     "title": "API Reference",
     "section": "",
-    "text": "Example\nExample class"
+    "text": "Shade detection at roadside stops (EU) from open satellite data.\n\n\n\nPipelineConfig\nTop-level pipeline configuration (one TOML file).\n\n\nload_config\nLoad a :class:PipelineConfig from a TOML file.\n\n\nrun_pipeline\nRun the pipeline for all stops in the config; returns the result table."
   },
   {
-    "objectID": "reference/Example.html",
-    "href": "reference/Example.html",
-    "title": "Example",
+    "objectID": "reference/PipelineConfig.html",
+    "href": "reference/PipelineConfig.html",
+    "title": "PipelineConfig",
     "section": "",
-    "text": "Example()\nExample class\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\nfactor\nfloat\nPower factor for calculation\n\n\n\n\n\n\n\n\n\nName\nDescription\n\n\n\n\ncalculation\nPerform a probabilistic calculation.\n\n\n\n\n\nExample.calculation(a, b)\nPerform a probabilistic calculation.\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\na\nnp.array\na parameter.\nrequired\n\n\nb\nnp.array\nb parameter\nrequired\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\nResults\nUpdated results."
+    "text": "PipelineConfig()\nTop-level pipeline configuration (one TOML file).\n\n\n\n\n\nName\nDescription\n\n\n\n\ncache_dir\n\n\n\ncanopy\n\n\n\ncountry\n\n\n\ndetection\n\n\n\nname\n\n\n\noutput\n\n\n\nscore\n\n\n\nshadow\n\n\n\nstac\n\n\n\nstops"
   },
   {
-    "objectID": "reference/Example.html#attributes",
-    "href": "reference/Example.html#attributes",
-    "title": "Example",
+    "objectID": "reference/PipelineConfig.html#attributes",
+    "href": "reference/PipelineConfig.html#attributes",
+    "title": "PipelineConfig",
     "section": "",
-    "text": "Name\nType\nDescription\n\n\n\n\nfactor\nfloat\nPower factor for calculation"
+    "text": "Name\nDescription\n\n\n\n\ncache_dir\n\n\n\ncanopy\n\n\n\ncountry\n\n\n\ndetection\n\n\n\nname\n\n\n\noutput\n\n\n\nscore\n\n\n\nshadow\n\n\n\nstac\n\n\n\nstops"
   },
   {
-    "objectID": "reference/Example.html#methods",
-    "href": "reference/Example.html#methods",
-    "title": "Example",
+    "objectID": "reference/load_config.html",
+    "href": "reference/load_config.html",
+    "title": "load_config",
     "section": "",
-    "text": "Name\nDescription\n\n\n\n\ncalculation\nPerform a probabilistic calculation.\n\n\n\n\n\nExample.calculation(a, b)\nPerform a probabilistic calculation.\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\na\nnp.array\na parameter.\nrequired\n\n\nb\nnp.array\nb parameter\nrequired\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\nResults\nUpdated results."
+    "text": "load_config\nload_config(path)\nLoad a :class:PipelineConfig from a TOML file.\nRelative paths in the config (seeds, cache, output) are resolved relative to the config file’s directory."
+  },
+  {
+    "objectID": "reference/run_pipeline.html",
+    "href": "reference/run_pipeline.html",
+    "title": "run_pipeline",
+    "section": "",
+    "text": "run_pipeline\nrun_pipeline(cfg, force=False, limit=None)\nRun the pipeline for all stops in the config; returns the result table.\nFailed stops are logged and skipped (recorded with an error field in their cache file), so one bad stop never kills a batch run."
   },
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Python_package_template",
+    "title": "Shaduw langs de snelweg",
     "section": "",
-    "text": "This package contains a template for python projects. This is developed by HKV and is published under the GNU GPL-3 license."
+    "text": "Shade detection at roadside stops (EU) from open satellite data. For a set of stopping places along highways (rest areas, service stations, parkings) the pipeline estimates how shaded each stop is, including seasonal variation, using only openly available data: Sentinel-2 imagery, the ETH global canopy height model and OpenStreetMap. Developed by HKV, published under GNU GPL-3.\nSee the plan (shade-detection-pipeline-plan.md) for the full design, and the API reference for the pipeline modules.\nQuick start:\npixi install\npixi run shaduw run --config configs/nl-prototype.toml"
   }
 ]
