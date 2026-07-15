@@ -1,7 +1,15 @@
 import datetime as dt
 from types import SimpleNamespace
 
-from shaduw_langs_de_snelweg.imagery import group_items_by_season, needs_boa_offset
+import numpy as np
+import xarray as xr
+
+from shaduw_langs_de_snelweg import imagery
+from shaduw_langs_de_snelweg.imagery import (
+    group_items_by_season,
+    needs_boa_offset,
+    seasonal_composites_cached,
+)
 
 
 def fake_item(month, cloud=10.0, year=2025, **props):
@@ -50,3 +58,25 @@ def test_needs_boa_offset_already_applied():
 
 def test_needs_boa_offset_missing_metadata():
     assert not needs_boa_offset(fake_item(6))
+
+
+def test_seasonal_composites_cached_hits_network_once(tmp_path, monkeypatch):
+    fake = {
+        "jja": xr.Dataset(
+            {"red": (("y", "x"), np.ones((2, 2), dtype="float32"))},
+            attrs={"n_scenes": 3},
+        ),
+        "djf": None,
+    }
+    calls = []
+    monkeypatch.setattr(
+        imagery, "seasonal_composites", lambda aoi, cfg: calls.append(1) or fake
+    )
+
+    first = seasonal_composites_cached(None, None, tmp_path, "stop-1")
+    second = seasonal_composites_cached(None, None, tmp_path, "stop-1")
+
+    assert calls == [1]  # second call served from disk
+    assert second["djf"] is None
+    assert second["jja"].attrs["n_scenes"] == 3
+    xr.testing.assert_identical(first["jja"], second["jja"])

@@ -106,3 +106,19 @@ def test_limit_processes_first_n(cfg, monkeypatch):
     monkeypatch.setattr(pipeline, "process_stop", lambda row, _cfg: dict(GOOD_METRICS))
     gdf = pipeline.run_pipeline(cfg, limit=1)
     assert list(gdf["stop_id"]) == ["s1"]
+
+
+def test_parallel_workers_keep_seed_order_and_cache(cfg, monkeypatch):
+    monkeypatch.setattr(pipeline, "_stops_with_cache", lambda c, f: prepared_stops())
+
+    def fake_process(row, _cfg):
+        if row["stop_id"] == "s2":
+            raise RuntimeError("boom")
+        return dict(GOOD_METRICS)
+
+    monkeypatch.setattr(pipeline, "process_stop", fake_process)
+
+    gdf = pipeline.run_pipeline(cfg, workers=4)
+    assert list(gdf["stop_id"]) == ["s1"]  # s2 failed, s1 in seed order
+    assert (cfg.cache_dir / "stops" / "s1.json").exists()
+    assert not (cfg.cache_dir / "stops" / "s2.json").exists()

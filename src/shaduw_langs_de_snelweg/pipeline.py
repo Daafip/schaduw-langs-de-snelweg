@@ -10,6 +10,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import logging
+from concurrent.futures import ThreadPoolExecutor
 
 import geopandas as gpd
 import pandas as pd
@@ -30,7 +31,9 @@ logger = logging.getLogger(__name__)
 
 def _stops_with_cache(cfg: PipelineConfig, force: bool) -> gpd.GeoDataFrame:
     """Prepare the stop table, cached as GeoJSON (Overpass is rate-limited)."""
-    cache = cfg.cache_dir / "stops_prepared.geojson"
+    # namespaced by config name: configs sharing a cache_dir must not
+    # silently reuse each other's stop tables
+    cache = cfg.cache_dir / f"stops_prepared_{cfg.name}.geojson"
     if cache.exists() and not force:
         gdf = gpd.read_file(cache)
         # pyogrio may auto-parse JSON-typed string fields into dicts already
@@ -92,40 +95,64 @@ def _write_debug_rasters(row, cfg: PipelineConfig, composites: dict, chm) -> Non
     logger.info("debug rasters for %s: %s", row["stop_id"], raster_dir)
 
 
+def _stop_metrics_with_cache(row, cfg: PipelineConfig, force: bool) -> dict:
+    """Metrics for one stop via the per-stop JSON cache."""
+    cache_file = cfg.cache_dir / "stops" / f"{row['stop_id']}.json"
+    if cache_file.exists() and not force:
+        metrics = json.loads(cache_file.read_text())
+        if "error" not in metrics:
+            return metrics
+        # stale failure from an older run: retry
+    try:
+        metrics = process_stop(row, cfg)
+    except Exception as exc:  # keep the batch alive
+        logger.exception("stop %s failed", row["stop_id"])
+        return {"error": str(exc)}
+    # only successes are cached, so failed stops retry next run
+    cache_file.write_text(json.dumps(metrics, default=str))
+    return metrics
+
+
 def run_pipeline(
     cfg: PipelineConfig,
     force: bool = False,
     limit: int | None = None,
+    workers: int = 1,
 ) -> gpd.GeoDataFrame:
     """Run the pipeline for all stops in the config; returns the result table.
 
     Failed stops are logged and skipped (recorded with an ``error`` field in
-    their cache file), so one bad stop never kills a batch run.
+    their cache file), so one bad stop never kills a batch run. With
+    ``workers > 1`` stops are processed in a thread pool (the work is
+    I/O-bound: STAC search plus HTTP range reads); results stay in seed
+    order either way.
     """
     stops = _stops_with_cache(cfg, force)
     if limit is not None:
         stops = stops.head(limit)
 
-    stop_cache = cfg.cache_dir / "stops"
-    stop_cache.mkdir(parents=True, exist_ok=True)
+    (cfg.cache_dir / "stops").mkdir(parents=True, exist_ok=True)
+
+    rows = [row for _, row in stops.iterrows()]
+    if workers <= 1:
+        results = [
+            _stop_metrics_with_cache(row, cfg, force)
+            for row in tqdm(rows, desc="stops")
+        ]
+    else:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            results = list(
+                tqdm(
+                    pool.map(
+                        lambda row: _stop_metrics_with_cache(row, cfg, force), rows
+                    ),
+                    total=len(rows),
+                    desc="stops",
+                )
+            )
 
     records = []
-    for _, row in tqdm(stops.iterrows(), total=len(stops), desc="stops"):
-        cache_file = stop_cache / f"{row['stop_id']}.json"
-        metrics = None
-        if cache_file.exists() and not force:
-            metrics = json.loads(cache_file.read_text())
-            if "error" in metrics:  # stale failure from an older run: retry
-                metrics = None
-        if metrics is None:
-            try:
-                metrics = process_stop(row, cfg)
-            except Exception as exc:  # keep the batch alive
-                logger.exception("stop %s failed", row["stop_id"])
-                metrics = {"error": str(exc)}
-            else:
-                # only successes are cached, so failed stops retry next run
-                cache_file.write_text(json.dumps(metrics, default=str))
+    for row, metrics in zip(rows, results):
         if "error" in metrics:
             continue
         records.append(

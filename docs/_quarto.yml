@@ -10,7 +10,7 @@ website:
       menu:
       - examples/notebooks/introduction.ipynb
     - text: map
-      href: examples/stops_shade_map_PoC.html
+      href: examples/stops_shade_map.html
     - text: "Python API"
       file: reference/index.qmd
     right:

@@ -10,6 +10,9 @@ from __future__ import annotations
 
 import datetime as dt
 import logging
+import pickle
+import time
+from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
@@ -18,6 +21,7 @@ import xarray as xr
 from odc.geo.geom import Geometry
 from odc.stac import load as odc_load
 from pystac_client import Client
+from rasterio.errors import RasterioIOError
 
 from shaduw_langs_de_snelweg.config import SEASONS, StacConfig
 
@@ -32,6 +36,10 @@ CLOUD_SCL = (0, 1, 8, 9, 10)
 VEG_EXTRA_SCL = (3, 11)
 
 MONTH_TO_SEASON = {m: s for s, months in SEASONS.items() for m in months}
+
+#: Retries for the scene load: S3 occasionally returns truncated range
+#: reads under load, which abort the whole composite with a RasterioIOError.
+LOAD_RETRIES = 2
 
 
 def search_items(aoi_4326, cfg: StacConfig) -> list[pystac.Item]:
@@ -93,16 +101,29 @@ def load_composite(
         return None
     utm = gpd.GeoSeries([aoi_4326], crs="EPSG:4326").estimate_utm_crs()
     geopolygon = Geometry(aoi_4326.__geo_interface__, "EPSG:4326")
-    ds = odc_load(
-        items,
-        bands=BANDS,
-        geopolygon=geopolygon,
-        crs=str(utm),
-        resolution=resolution,
-        groupby="solar_day",
-        dtype="uint16",
-        chunks=None,
-    )
+    for attempt in range(LOAD_RETRIES + 1):
+        try:
+            ds = odc_load(
+                items,
+                bands=BANDS,
+                geopolygon=geopolygon,
+                crs=str(utm),
+                resolution=resolution,
+                groupby="solar_day",
+                dtype="uint16",
+                chunks=None,
+            )
+            break
+        except RasterioIOError as exc:
+            if attempt == LOAD_RETRIES:
+                raise
+            logger.warning(
+                "scene load failed (%s); retry %d/%d",
+                exc,
+                attempt + 1,
+                LOAD_RETRIES,
+            )
+            time.sleep(5 * (attempt + 1))
 
     reflectance = ds[["red", "green", "blue", "nir"]].astype("float32")
     # Harmonise baseline >= 04.00 scenes to the old DN convention (-1000).
@@ -141,6 +162,29 @@ def _items_per_time(ds: xr.Dataset, items: list[pystac.Item]) -> list[pystac.Ite
         # fall back to the first item if the day is not found (should not happen)
         out.append(by_day.get(day, items[0]))
     return out
+
+
+def seasonal_composites_cached(
+    aoi_4326, cfg: StacConfig, cache_dir: Path, stop_id: str
+) -> dict[str, xr.Dataset | None]:
+    """:func:`seasonal_composites` with a per-stop on-disk cache.
+
+    The composites are pickled under ``cache_dir/composites/`` — a
+    disposable cache: delete the directory to fetch fresh imagery. Meant
+    for interactive use (notebooks), where re-downloading scenes on every
+    run is too slow.
+    """
+    path = Path(cache_dir) / "composites" / f"{stop_id}.pkl"
+    if path.exists():
+        with path.open("rb") as f:
+            composites = pickle.load(f)
+        logger.info("composites for %s loaded from cache", stop_id)
+        return composites
+    composites = seasonal_composites(aoi_4326, cfg)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("wb") as f:
+        pickle.dump(composites, f)
+    return composites
 
 
 def seasonal_composites(aoi_4326, cfg: StacConfig) -> dict[str, xr.Dataset | None]:

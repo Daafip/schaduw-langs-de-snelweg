@@ -4,6 +4,7 @@ repos:
     rev: v5.0.0
     hooks:
       - id: check-added-large-files
+        args: [--maxkb=2000]  # walkthrough notebook keeps outputs (~600 KB)
       - id: check-ast
       - id: check-case-conflict
       - id: check-merge-conflict
@@ -36,3 +37,6 @@ repos:
     rev: 0.8.1
     hooks:
     - id: nbstripout
+      # the walkthrough notebook is committed *with* outputs so the docs
+      # build can use them instead of re-executing (slow, needs network)
+      exclude: ^docs/examples/notebooks/introduction\.ipynb$

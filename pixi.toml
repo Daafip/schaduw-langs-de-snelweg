@@ -14,6 +14,7 @@ install = "pre-commit install"
 
 # Pipeline
 run = "shaduw run --config configs/nl-prototype.toml"
+run-full = "shaduw run --config configs/nl-full.toml --workers 8"
 discover = "shaduw discover --country NL --out configs/seeds/nl-discovered.geojson"
 test = "pytest test -v"
 
@@ -28,7 +29,8 @@ quarto-preview = { cmd = "export QUARTO_PYTHON=python && quarto preview docs", d
     "quartodoc-build",
 ] }
 quarto-check = { cmd = "quarto check all", depends-on = ["quartodoc-build"] }
-quarto-render = { cmd = "export QUARTO_PYTHON=python && quarto render docs --to html --execute", depends-on = [
+# no --execute: notebooks are committed with their outputs and rendered as-is
+quarto-render = { cmd = "export QUARTO_PYTHON=python && quarto render docs --to html", depends-on = [
     "quartodoc-build",
 ] }
 docs = { depends-on = ["quarto-preview"] }
