@@ -133,7 +133,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </ul>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="../examples/stops_shade_map_PoC.html"> 
+    <a class="nav-link" href="../examples/stops_shade_map.html"> 
 <span class="menu-text">map</span></a>
   </li>  
   <li class="nav-item">
@@ -175,9 +175,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="shaduw_langs_de_snelweg.run_pipeline" class="level1">
 <h1>run_pipeline</h1>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>run_pipeline(cfg, force<span class="op">=</span><span class="va">False</span>, limit<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>run_pipeline(cfg, force<span class="op">=</span><span class="va">False</span>, limit<span class="op">=</span><span class="va">None</span>, workers<span class="op">=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Run the pipeline for all stops in the config; returns the result table.</p>
-<p>Failed stops are logged and skipped (recorded with an <code>error</code> field in their cache file), so one bad stop never kills a batch run.</p>
+<p>Failed stops are logged and skipped (recorded with an <code>error</code> field in their cache file), so one bad stop never kills a batch run. With <code>workers &gt; 1</code> stops are processed in a thread pool (the work is I/O-bound: STAC search plus HTTP range reads); results stay in seed order either way.</p>
 
 
 </section>

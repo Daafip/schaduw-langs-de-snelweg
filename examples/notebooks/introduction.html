@@ -57,7 +57,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -100,6 +100,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 </head>
@@ -133,7 +136,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </ul>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="../../examples/stops_shade_map_PoC.html"> 
+    <a class="nav-link" href="../../examples/stops_shade_map.html"> 
 <span class="menu-text">map</span></a>
   </li>  
   <li class="nav-item">
@@ -158,8 +161,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-pipeline-step-by-step" id="toc-the-pipeline-step-by-step" class="nav-link active" data-scroll-target="#the-pipeline-step-by-step">The pipeline, step by step</a>
+  <ul class="collapse">
+  <li><a href="#step-1-from-seed-to-parking-polygon-and-aoi" id="toc-step-1-from-seed-to-parking-polygon-and-aoi" class="nav-link" data-scroll-target="#step-1-from-seed-to-parking-polygon-and-aoi">Step 1 — from seed to parking polygon and AOI</a></li>
+  <li><a href="#step-2-sentinel-2-seasonal-composites" id="toc-step-2-sentinel-2-seasonal-composites" class="nav-link" data-scroll-target="#step-2-sentinel-2-seasonal-composites">Step 2 — Sentinel-2 seasonal composites</a></li>
+  <li><a href="#step-3-vegetation-ndvi-and-its-seasonal-swing" id="toc-step-3-vegetation-ndvi-and-its-seasonal-swing" class="nav-link" data-scroll-target="#step-3-vegetation-ndvi-and-its-seasonal-swing">Step 3 — vegetation: NDVI and its seasonal swing</a></li>
+  <li><a href="#step-4-detected-shadow-in-the-1030-composites" id="toc-step-4-detected-shadow-in-the-1030-composites" class="nav-link" data-scroll-target="#step-4-detected-shadow-in-the-1030-composites">Step 4 — detected shadow in the ~10:30 composites</a></li>
+  <li><a href="#step-5-canopy-height-and-the-modelled-shadow-footprint" id="toc-step-5-canopy-height-and-the-modelled-shadow-footprint" class="nav-link" data-scroll-target="#step-5-canopy-height-and-the-modelled-shadow-footprint">Step 5 — canopy height and the modelled shadow footprint</a></li>
+  <li><a href="#step-6-metrics-score-class" id="toc-step-6-metrics-score-class" class="nav-link" data-scroll-target="#step-6-metrics-score-class">Step 6 — metrics, score, class</a></li>
+  <li><a href="#step-7-the-product" id="toc-step-7-the-product" class="nav-link" data-scroll-target="#step-7-the-product">Step 7 — the product</a></li>
+  <li><a href="#running-it-at-scale" id="toc-running-it-at-scale" class="nav-link" data-scroll-target="#running-it-at-scale">Running it at scale</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -185,18 +204,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <p>The pipeline’s headline metric is the <strong>modeled shadow fraction</strong>: canopy height + sun position -&gt; shadow footprint at any date/time. This notebook demonstrates the shadow caster on a synthetic canopy, no downloads needed.</p>
 <p>For the full pipeline run <code>pixi run shaduw run --config configs/nl-prototype.toml</code>.</p>
-<div id="1" class="cell" data-execution_count="1">
+<div id="1" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:00.588673Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:00.588532Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:01.853955Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:01.853149Z&quot;}" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shaduw_langs_de_snelweg.shadow <span class="im">import</span> cast_shadow_mask</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="2" class="cell" data-execution_count="2">
+<div id="2" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:01.855854Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:01.855515Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:01.858445Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:01.858016Z&quot;}" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Synthetic 1 m canopy: a row of 12 m trees south of a bare parking</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>chm <span class="op">=</span> np.zeros((<span class="dv">80</span>, <span class="dv">80</span>), dtype<span class="op">=</span><span class="st">"float32"</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>chm[<span class="dv">50</span>:<span class="dv">56</span>, <span class="dv">20</span>:<span class="dv">60</span>] <span class="op">=</span> <span class="fl">12.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="3" class="cell" data-execution_count="3">
+<div id="3" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:01.859788Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:01.859604Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:02.115822Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:02.115334Z&quot;}" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Summer afternoon: sun in the southwest, 40 degrees up</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>shadow <span class="op">=</span> cast_shadow_mask(chm, resolution<span class="op">=</span><span class="fl">1.0</span>, azimuth_deg<span class="op">=</span><span class="fl">230.0</span>, elevation_deg<span class="op">=</span><span class="fl">40.0</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -214,8 +233,743 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+<section id="the-pipeline-step-by-step" class="level2">
+<h2 class="anchored" data-anchor-id="the-pipeline-step-by-step">The pipeline, step by step</h2>
+<p>The synthetic demo above is the heart of the method, but the real pipeline wraps it in six data stages. One <strong>stop</strong> (a rest area) is one unit of work:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>stage</th>
+<th>module</th>
+<th>what happens</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1. Stops</td>
+<td><code>stops.py</code></td>
+<td>seed point/polygon → parking polygon + analysis AOI</td>
+</tr>
+<tr class="even">
+<td>2. Imagery</td>
+<td><code>imagery.py</code></td>
+<td>STAC search → cloud-masked seasonal median composites (Sentinel-2, 10 m)</td>
+</tr>
+<tr class="odd">
+<td>3. Vegetation</td>
+<td><code>metrics.py</code></td>
+<td>NDVI summer/winter, tree fraction</td>
+</tr>
+<tr class="even">
+<td>4. Detected shadow</td>
+<td><code>metrics.py</code></td>
+<td>dark-pixel fraction in the ~10:30 composites</td>
+</tr>
+<tr class="odd">
+<td>5. Canopy &amp; modelled shadow</td>
+<td><code>canopy.py</code>, <code>shadow.py</code></td>
+<td>1 m canopy height → shadow footprint at 12 h / 15 h on the summer solstice</td>
+</tr>
+<tr class="even">
+<td>6. Score &amp; outputs</td>
+<td><code>score.py</code>, <code>outputs.py</code></td>
+<td>weighted 0–1 score → <code>none</code>/<code>partial</code>/<code>good</code> → GeoParquet + GeoPackage + web map</td>
+</tr>
+</tbody>
+</table>
+<p>Below we run every stage <strong>interactively for one real stop</strong> and watch the raw data turn into the final product. Everything comes from open sources (no accounts, no keys); the imagery step downloads a few MB from public S3 buckets, so it takes a minute or two on first run.</p>
+<p>Configuration is one TOML file, validated by pydantic:</p>
+<div id="5" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:02.117261Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:02.117102Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:02.121473Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:02.121124Z&quot;}" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shaduw_langs_de_snelweg.config <span class="im">import</span> load_config</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>cfg <span class="op">=</span> load_config(<span class="st">"../../../configs/nl-prototype.toml"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"seeds:    </span><span class="sc">{</span>cfg<span class="sc">.</span>stops<span class="sc">.</span>seed_path<span class="sc">.</span>name<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"imagery:  </span><span class="sc">{</span>cfg<span class="sc">.</span>stac<span class="sc">.</span>collection<span class="sc">}</span><span class="ss"> @ </span><span class="sc">{</span>cfg<span class="sc">.</span>stac<span class="sc">.</span>resolution<span class="sc">}</span><span class="ss"> m, </span><span class="sc">{</span>cfg<span class="sc">.</span>stac<span class="sc">.</span>years_back<span class="sc">}</span><span class="ss"> years back"</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"canopy:   </span><span class="sc">{</span>cfg<span class="sc">.</span>canopy<span class="sc">.</span>source<span class="sc">}</span><span class="ss"> @ </span><span class="sc">{</span>cfg<span class="sc">.</span>canopy<span class="sc">.</span>resolution<span class="sc">}</span><span class="ss"> m"</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"shadow:   </span><span class="sc">{</span>cfg<span class="sc">.</span>shadow<span class="sc">.</span>date<span class="sc">}</span><span class="ss"> at </span><span class="sc">{</span>cfg<span class="sc">.</span>shadow<span class="sc">.</span>hours<span class="sc">}</span><span class="ss"> h (</span><span class="sc">{</span>cfg<span class="sc">.</span>shadow<span class="sc">.</span>timezone<span class="sc">}</span><span class="ss">)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>seeds:    nl-prototype.geojson
+imagery:  sentinel-2-l2a @ 10.0 m, 2 years back
+canopy:   meta @ 1.0 m
+shadow:   06-21 at [12, 15] h (Europe/Amsterdam)</code></pre>
+</div>
+</div>
+<section id="step-1-from-seed-to-parking-polygon-and-aoi" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-from-seed-to-parking-polygon-and-aoi">Step 1 — from seed to parking polygon and AOI</h3>
+<p>A seed is a point or polygon in a GeoJSON file. Point seeds are resolved to the actual <strong>parking polygon</strong> via OpenStreetMap (Overpass); if nothing is found the point is buffered as a fallback. Around the parking we add a 30 m <strong>AOI buffer</strong>, because the trees that shade a parking usually stand <em>next to</em> it, not on it.</p>
+<p>The prepared stop table is cached (<code>cache/stops_prepared_&lt;name&gt;.geojson</code>), so this cell does not hit Overpass on reruns:</p>
+<div id="7" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:02.122876Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:02.122601Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:02.143258Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:02.142766Z&quot;}" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shaduw_langs_de_snelweg.pipeline <span class="im">import</span> _stops_with_cache</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>stops <span class="op">=</span> _stops_with_cache(cfg, force<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>stops[[<span class="st">"stop_id"</span>, <span class="st">"name"</span>, <span class="st">"polygon_source"</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
 
 
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">stop_id</th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">polygon_source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>osm-way-84069111</td>
+<td>Uilengoor (A1)</td>
+<td>osm</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>osm-way-438615192</td>
+<td>Korte Langesteijn</td>
+<td>osm</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>osm-way-490680589</td>
+<td>Ronduit (A1)</td>
+<td>osm</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>osm-way-608036225</td>
+<td>Oldenaller (A28)</td>
+<td>buffer</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>osm-way-664516138</td>
+<td>De Mark (A2)</td>
+<td>osm</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="8" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:02.144991Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:02.144416Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:02.156879Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:02.156539Z&quot;}" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> folium</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>stop <span class="op">=</span> stops.iloc[<span class="dv">0</span>]  <span class="co"># Uilengoor along the A1</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>center <span class="op">=</span> stop.geometry.centroid</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> folium.Map(location<span class="op">=</span>[center.y, center.x], zoom_start<span class="op">=</span><span class="dv">17</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>folium.GeoJson(</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    stop[<span class="st">"aoi"</span>].__geo_interface__,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    style_function<span class="op">=</span><span class="kw">lambda</span> f: {<span class="st">"color"</span>: <span class="st">"#1565c0"</span>, <span class="st">"fillOpacity"</span>: <span class="fl">0.05</span>},</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    tooltip<span class="op">=</span><span class="st">"AOI (parking + 30 m buffer)"</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>).add_to(m)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>folium.GeoJson(</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    stop.geometry.__geo_interface__,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    style_function<span class="op">=</span><span class="kw">lambda</span> f: {<span class="st">"color"</span>: <span class="st">"#c62828"</span>, <span class="st">"fillOpacity"</span>: <span class="fl">0.3</span>},</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    tooltip<span class="op">=</span><span class="st">"parking polygon (from OSM)"</span>,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>).add_to(m)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>m</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div style="width:100%;"><div style="position:relative;width:100%;height:0;padding-bottom:60%;"><span style="color:#565656">Make this Notebook Trusted to load map: File -&gt; Trust Notebook</span><iframe srcdoc="<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=UTF-8&quot; />
+    <script src=&quot;https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js&quot;></script>
+    <script src=&quot;https://code.jquery.com/jquery-3.7.1.min.js&quot;></script>
+    <script src=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js&quot;></script>
+    <script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js&quot;></script>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css&quot;/>
+    
+            <meta name=&quot;viewport&quot; content=&quot;width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no&quot; />
+            <style>
+                #map_1a208293043e9d13900c5667125a260e {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class=&quot;folium-map&quot; id=&quot;map_1a208293043e9d13900c5667125a260e&quot; ></div>
+        
+</body>
+<script>
+    
+    
+            var map_1a208293043e9d13900c5667125a260e = L.map(
+                &quot;map_1a208293043e9d13900c5667125a260e&quot;,
+                {
+                    center: [52.16542915348158, 5.545690356519718],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  &quot;zoom&quot;: 17,
+  &quot;zoomControl&quot;: true,
+  &quot;preferCanvas&quot;: false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_67a32dc6f71e53c8017b2bcd8c3d09d8 = L.tileLayer(
+                &quot;https://tile.openstreetmap.org/{z}/{x}/{y}.png&quot;,
+                {
+  &quot;minZoom&quot;: 0,
+  &quot;maxZoom&quot;: 19,
+  &quot;maxNativeZoom&quot;: 19,
+  &quot;noWrap&quot;: false,
+  &quot;attribution&quot;: &quot;\u0026copy; \u003ca href=\&quot;https://www.openstreetmap.org/copyright\&quot;\u003eOpenStreetMap\u003c/a\u003e contributors&quot;,
+  &quot;subdomains&quot;: &quot;abc&quot;,
+  &quot;detectRetina&quot;: false,
+  &quot;tms&quot;: false,
+  &quot;opacity&quot;: 1,
+}
+
+            );
+        
+    
+            tile_layer_67a32dc6f71e53c8017b2bcd8c3d09d8.addTo(map_1a208293043e9d13900c5667125a260e);
+        
+    
+        function geo_json_16d28a2f355ff155bbb55e83eb2ce153_styler(feature) {
+            switch(feature.id) {
+                default:
+                    return {&quot;color&quot;: &quot;#1565c0&quot;, &quot;fillOpacity&quot;: 0.05};
+            }
+        }
+
+        function geo_json_16d28a2f355ff155bbb55e83eb2ce153_onEachFeature(feature, layer) {
+
+            layer.on({
+            });
+        };
+        var geo_json_16d28a2f355ff155bbb55e83eb2ce153 = L.geoJson(null, {
+                onEachFeature: geo_json_16d28a2f355ff155bbb55e83eb2ce153_onEachFeature,
+            
+                style: geo_json_16d28a2f355ff155bbb55e83eb2ce153_styler,
+            ...{
+}
+        });
+
+        function geo_json_16d28a2f355ff155bbb55e83eb2ce153_add (data) {
+            geo_json_16d28a2f355ff155bbb55e83eb2ce153
+                .addData(data);
+        }
+            geo_json_16d28a2f355ff155bbb55e83eb2ce153_add({&quot;features&quot;: [{&quot;geometry&quot;: {&quot;coordinates&quot;: [[[5.543326990123903, 52.165640433637684], [5.543360606434129, 52.16565509788289], [5.543396313413115, 52.165667756273734], [5.543433795536014, 52.1656782969538], [5.5434727215910975, 52.1656866267799], [5.543512747606619, 52.16569267214509], [5.546481464694053, 52.166050974036374], [5.546513790327646, 52.16605410973207], [5.546546406256405, 52.16605575407258], [5.549262522666794, 52.16613005430483], [5.549304481270185, 52.1661299658156], [5.5493462339897865, 52.1661274114252], [5.5493873984551545, 52.16612241452679], [5.549427597683378, 52.1661150208819], [5.549466463531656, 52.16610529820143], [5.549503640068887, 52.166093335525396], [5.5495387868354005, 52.1660792424076], [5.549571581960955, 52.16606314791215], [5.549601725112478, 52.16604519943156], [5.549628940244494, 52.16602556133677], [5.549652978127122, 52.16600441347193], [5.54967361862841, 52.16598194950722], [5.5496906727301845, 52.165958375165225], [5.549703984258899, 52.16593390633691], [5.549738483595163, 52.165858706222814], [5.549741706751413, 52.165851276677685], [5.549765106234505, 52.16579407660052], [5.549773650736058, 52.165767685044], [5.54977787460425, 52.165740901177806], [5.549777735772583, 52.16571399179831], [5.549773235631837, 52.16568722495171], [5.549764419015914, 52.16566086726391], [5.549751373754943, 52.165635181284735], [5.549734229800099, 52.16561042287265], [5.549713157928897, 52.16558683864618], [5.549688368043872, 52.165564663527455], [5.54966010708154, 52.16554411840217], [5.54962865655255, 52.165525407919425], [5.549594329737492, 52.16550871845332], [5.549557468566296, 52.16549421624652], [5.54951844021233, 52.165482045754416], [5.549477633435087, 52.1654723282063], [5.549435454707928, 52.16546516039782], [5.542876991856529, 52.164564365199205], [5.542834588111863, 52.16455987024344], [5.542791672088739, 52.16455795297629], [5.542748657129898, 52.164558631863926], [5.542705957530954, 52.16456190036776], [5.542663984550348, 52.16456772700754], [5.542623142448544, 52.1645760556644], [5.54258382459462, 52.164586806121484], [5.542546409677704, 52.1645998748364], [5.5425112580597915, 52.164615135938455], [5.5424787083050155, 52.16463244244094], [5.542449073918825, 52.16465162765674], [5.542422640328455, 52.1646725068037], [5.542399662133792, 52.16469487878434], [5.542380360655086, 52.1647185281226], [5.542364921801148, 52.16474322703917], [5.542353494278586, 52.16476873764533], [5.542327093608956, 52.16484143755879], [5.542326413721513, 52.16484334212342], [5.542289612750721, 52.16494824200306], [5.542282437705986, 52.16497530676236], [5.542279770219253, 52.165002679713794], [5.542281637891546, 52.16503007770919], [5.542288021411774, 52.16505721734078], [5.5422988547561385, 52.16508381787282], [5.542314025870773, 52.16510960414562], [5.542333377830528, 52.165134309421845], [5.542356710461967, 52.16515767814572], [5.5423837824137685, 52.16517946858667], [5.542414313653133, 52.165199455339824], [5.542447988362395, 52.1652174316578], [5.543326990123903, 52.165640433637684]]], &quot;type&quot;: &quot;Polygon&quot;}, &quot;id&quot;: &quot;0&quot;, &quot;type&quot;: &quot;Feature&quot;}], &quot;type&quot;: &quot;FeatureCollection&quot;});
+
+        
+    
+            geo_json_16d28a2f355ff155bbb55e83eb2ce153.bindTooltip(
+                `<div>
+                     AOI (parking + 30 m buffer)
+                 </div>`,
+                {
+  &quot;sticky&quot;: true,
+}
+            );
+        
+    
+            geo_json_16d28a2f355ff155bbb55e83eb2ce153.addTo(map_1a208293043e9d13900c5667125a260e);
+        
+    
+        function geo_json_d619dff275cb675b5c7a7aa1825b27a3_styler(feature) {
+            switch(feature.id) {
+                default:
+                    return {&quot;color&quot;: &quot;#c62828&quot;, &quot;fillOpacity&quot;: 0.3};
+            }
+        }
+
+        function geo_json_d619dff275cb675b5c7a7aa1825b27a3_onEachFeature(feature, layer) {
+
+            layer.on({
+            });
+        };
+        var geo_json_d619dff275cb675b5c7a7aa1825b27a3 = L.geoJson(null, {
+                onEachFeature: geo_json_d619dff275cb675b5c7a7aa1825b27a3_onEachFeature,
+            
+                style: geo_json_d619dff275cb675b5c7a7aa1825b27a3_styler,
+            ...{
+}
+        });
+
+        function geo_json_d619dff275cb675b5c7a7aa1825b27a3_add (data) {
+            geo_json_d619dff275cb675b5c7a7aa1825b27a3
+                .addData(data);
+        }
+            geo_json_d619dff275cb675b5c7a7aa1825b27a3_add({&quot;features&quot;: [{&quot;geometry&quot;: {&quot;coordinates&quot;: [[[5.5435972, 52.1654281], [5.5465659, 52.1657864], [5.549282, 52.1658607], [5.5493165, 52.1657855], [5.5493399, 52.1657283], [5.5427814, 52.1648275], [5.542755, 52.1649002], [5.5427182, 52.1650051], [5.5435972, 52.1654281]]], &quot;type&quot;: &quot;Polygon&quot;}, &quot;id&quot;: &quot;0&quot;, &quot;type&quot;: &quot;Feature&quot;}], &quot;type&quot;: &quot;FeatureCollection&quot;});
+
+        
+    
+            geo_json_d619dff275cb675b5c7a7aa1825b27a3.bindTooltip(
+                `<div>
+                     parking polygon (from OSM)
+                 </div>`,
+                {
+  &quot;sticky&quot;: true,
+}
+            );
+        
+    
+            geo_json_d619dff275cb675b5c7a7aa1825b27a3.addTo(map_1a208293043e9d13900c5667125a260e);
+        
+</script>
+</html>" style="position:absolute;width:100%;height:100%;left:0;top:0;border:none !important;" allowfullscreen="" webkitallowfullscreen="" mozallowfullscreen=""></iframe></div></div>
+</div>
+</div>
+</section>
+<section id="step-2-sentinel-2-seasonal-composites" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-sentinel-2-seasonal-composites">Step 2 — Sentinel-2 seasonal composites</h3>
+<p>We search a STAC catalogue once for all scenes over the AOI (last 2 years, &lt; 30 % cloud cover), bucket them into meteorological seasons and reduce each bucket to a <strong>cloud-masked median composite</strong>. The median works because clouds and cloud shadows move between acquisitions while the surface does not — so the per-pixel median converges on the cloud-free view. Only the pixels inside the AOI are transferred (HTTP range reads on cloud-optimised GeoTIFFs), never a whole tile.</p>
+<p>Downloading all scenes for the four seasons takes a minute or two, so the notebook uses the <strong>cached</strong> variant: the composites are stored on disk per stop and reruns load them in seconds. Delete <code>cache/composites/</code> to fetch fresh imagery:</p>
+<div id="10" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:02.158257Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:02.158095Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:02.162300Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:02.161872Z&quot;}" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shaduw_langs_de_snelweg.imagery <span class="im">import</span> seasonal_composites_cached</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>composites <span class="op">=</span> seasonal_composites_cached(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    stop[<span class="st">"aoi"</span>], cfg.stac, cfg.cache_dir, stop[<span class="st">"stop_id"</span>]</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    season: (c.attrs[<span class="st">"n_scenes"</span>] <span class="cf">if</span> c <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="cf">else</span> <span class="dv">0</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> season, c <span class="kw">in</span> composites.items()</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>{'djf': 7, 'mam': 10, 'jja': 12, 'son': 11}</code></pre>
+</div>
+</div>
+<div id="11" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:02.163566Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:02.163429Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:02.311388Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:02.310934Z&quot;}" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">4</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="fl">4.5</span>))</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (season, comp) <span class="kw">in</span> <span class="bu">zip</span>(axes, composites.items()):</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    ax.axis(<span class="st">"off"</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> comp <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        ax.set_title(<span class="ss">f"</span><span class="sc">{</span>season<span class="sc">}</span><span class="ss">: no scenes"</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    rgb <span class="op">=</span> np.dstack([comp[b].values <span class="cf">for</span> b <span class="kw">in</span> (<span class="st">"red"</span>, <span class="st">"green"</span>, <span class="st">"blue"</span>)])</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    ax.imshow(np.clip(rgb <span class="op">/</span> <span class="fl">0.25</span>, <span class="dv">0</span>, <span class="dv">1</span>))  <span class="co"># stretch reflectance for display</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"</span><span class="sc">{</span>season<span class="sc">}</span><span class="ss"> — median of </span><span class="sc">{</span>comp<span class="sc">.</span>attrs[<span class="st">'n_scenes'</span>]<span class="sc">}</span><span class="ss"> scenes"</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Cloud-masked seasonal composites (true colour)"</span>, y<span class="op">=</span><span class="fl">1.02</span>)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="introduction_files/figure-html/cell-9-output-1.png" width="1526" height="332" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="step-3-vegetation-ndvi-and-its-seasonal-swing" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-vegetation-ndvi-and-its-seasonal-swing">Step 3 — vegetation: NDVI and its seasonal swing</h3>
+<p>NDVI = (NIR − red) / (NIR + red): healthy vegetation reflects strongly in near-infrared and absorbs red, so it scores high. Comparing <strong>summer (jja)</strong> against <strong>winter (djf)</strong> separates deciduous trees (large drop) from evergreen vegetation and grass. For NDVI the composites carry extra-masked bands (<code>red_veg</code>, <code>nir_veg</code>) where cloud <em>shadow</em> pixels are also removed — for shadow detection we deliberately keep those.</p>
+<div id="13" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:02.313031Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:02.312678Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:02.680847Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:02.680368Z&quot;}" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shaduw_langs_de_snelweg.metrics <span class="im">import</span> ndvi</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="fl">4.5</span>))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, season <span class="kw">in</span> <span class="bu">zip</span>(axes, (<span class="st">"jja"</span>, <span class="st">"djf"</span>)):</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    ndvi(composites[season]).plot(ax<span class="op">=</span>ax, vmin<span class="op">=</span><span class="fl">0.0</span>, vmax<span class="op">=</span><span class="fl">0.9</span>, cmap<span class="op">=</span><span class="st">"RdYlGn"</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"NDVI </span><span class="sc">{</span>season<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="introduction_files/figure-html/cell-10-output-1.png" width="1025" height="420" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="step-4-detected-shadow-in-the-1030-composites" class="level3">
+<h3 class="anchored" data-anchor-id="step-4-detected-shadow-in-the-1030-composites">Step 4 — detected shadow in the ~10:30 composites</h3>
+<p>Sentinel-2 passes over the Netherlands around 10:30 local time, so persistent dark pixels in the composite <em>are</em> morning shadow. “Dark” is broadband brightness (R+G+B+NIR)/4 below a calibrated threshold — NIR must be included, because vegetation is dark in the visible bands but bright in NIR, while true shadow is dark in all four.</p>
+<p>The fraction is evaluated over the <strong>parking polygon only</strong> (that is where the car stands):</p>
+<div id="15" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:02.682514Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:02.682335Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:02.978342Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:02.978002Z&quot;}" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shaduw_langs_de_snelweg.metrics <span class="im">import</span> (</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    brightness,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    detected_shadow_fraction,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    mask_for_geometry,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>jja <span class="op">=</span> composites[<span class="st">"jja"</span>]</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>bright <span class="op">=</span> brightness(jja)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="fl">4.5</span>))</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>bright.plot(ax<span class="op">=</span>axes[<span class="dv">0</span>], cmap<span class="op">=</span><span class="st">"magma"</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">"brightness (R+G+B+NIR)/4"</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>(bright <span class="op">&lt;</span> cfg.detection.brightness_threshold).plot(ax<span class="op">=</span>axes[<span class="dv">1</span>], cmap<span class="op">=</span><span class="st">"gray_r"</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="ss">f"shadow: brightness &lt; </span><span class="sc">{</span>cfg<span class="sc">.</span>detection<span class="sc">.</span>brightness_threshold<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>parking_mask <span class="op">=</span> mask_for_geometry(jja, stop.geometry)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"detected shadow fraction (summer, parking only):"</span>,</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">round</span>(detected_shadow_fraction(jja, parking_mask, cfg.detection), <span class="dv">3</span>),</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>detected shadow fraction (summer, parking only): 0.0</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="introduction_files/figure-html/cell-11-output-2.png" width="1024" height="405" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="step-5-canopy-height-and-the-modelled-shadow-footprint" class="level3">
+<h3 class="anchored" data-anchor-id="step-5-canopy-height-and-the-modelled-shadow-footprint">Step 5 — canopy height and the modelled shadow footprint</h3>
+<p>The detected shadow only shows 10:30 — but a parked car cares about the <em>afternoon</em>. So we load a 1 m <strong>canopy height model</strong> (Meta/WRI, global, on AWS Open Data; the clipped window is cached per stop) and run the same ray-marching shadow caster from the synthetic demo on the real canopy, at the hours and date from the config (summer solstice, 12 h and 15 h). The sun position comes from <code>pvlib</code>.</p>
+<div id="17" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:02.979730Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:02.979578Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:03.462641Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:03.462286Z&quot;}" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shaduw_langs_de_snelweg.canopy <span class="im">import</span> load_canopy</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>chm <span class="op">=</span> load_canopy(stop[<span class="st">"aoi"</span>], cfg.canopy, cfg.cache_dir, stop[<span class="st">"stop_id"</span>])</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>chm.plot(cmap<span class="op">=</span><span class="st">"Greens"</span>, vmin<span class="op">=</span><span class="dv">0</span>, figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">5</span>))</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f"Canopy height (m), </span><span class="sc">{</span>cfg<span class="sc">.</span>canopy<span class="sc">.</span>resolution<span class="sc">}</span><span class="ss"> m grid"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>Text(0.5, 1.0, 'Canopy height (m), 1.0 m grid')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="introduction_files/figure-html/cell-12-output-2.png" width="497" height="463" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="18" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:03.464069Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:03.463892Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:04.362370Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:04.362014Z&quot;}" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> datetime <span class="im">as</span> dt</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shaduw_langs_de_snelweg.shadow <span class="im">import</span> (</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    local_time,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    modeled_shadow_mask,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    solar_position,</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>year <span class="op">=</span> dt.date.today().year</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="bu">len</span>(cfg.shadow.hours), figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">5</span>))</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, hour <span class="kw">in</span> <span class="bu">zip</span>(axes, cfg.shadow.hours):</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    when <span class="op">=</span> local_time(cfg.shadow.date, hour, cfg.shadow.timezone, year)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    azimuth, elevation <span class="op">=</span> solar_position(center.y, center.x, when)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> modeled_shadow_mask(</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        chm, center.y, center.x, when, cfg.shadow.self_shade_height_m</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    mask.plot(ax<span class="op">=</span>ax, cmap<span class="op">=</span><span class="st">"gray_r"</span>, add_colorbar<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    ax.set_title(</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"</span><span class="sc">{</span>cfg<span class="sc">.</span>shadow<span class="sc">.</span>date<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>hour<span class="sc">}</span><span class="ss">:00 — sun az </span><span class="sc">{</span>azimuth<span class="sc">:.0f}</span><span class="ss">°, el </span><span class="sc">{</span>elevation<span class="sc">:.0f}</span><span class="ss">°"</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="introduction_files/figure-html/cell-13-output-1.png" width="1138" height="453" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="step-6-metrics-score-class" class="level3">
+<h3 class="anchored" data-anchor-id="step-6-metrics-score-class">Step 6 — metrics, score, class</h3>
+<p><code>compute_stop_metrics</code> bundles all of the above with fixed zonal conventions: NDVI and tree fraction over the <strong>AOI</strong>, mean canopy height over the <strong>buffer ring</strong>, both shadow fractions over the <strong>parking polygon</strong>.</p>
+<p>The composite score is a weighted mean — modelled 15 h shadow (0.5), tree fraction (0.3), detected summer shadow (0.2) — renormalised over whatever is available, so one missing input degrades the score gracefully instead of dragging it to zero. Class bounds: below 0.15 → <code>none</code>, above 0.40 → <code>good</code>, in between → <code>partial</code>.</p>
+<div id="20" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:04.363821Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:04.363667Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:04.413295Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:04.412926Z&quot;}" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shaduw_langs_de_snelweg.metrics <span class="im">import</span> compute_stop_metrics</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shaduw_langs_de_snelweg.score <span class="im">import</span> shade_class, shade_score</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>metrics <span class="op">=</span> compute_stop_metrics(</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    parking_geom_4326<span class="op">=</span>stop.geometry,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    aoi_geom_4326<span class="op">=</span>stop[<span class="st">"aoi"</span>],</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    composites<span class="op">=</span>composites,</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    chm<span class="op">=</span>chm,</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    detection_cfg<span class="op">=</span>cfg.detection,</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    shadow_cfg<span class="op">=</span>cfg.shadow,</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    tree_threshold<span class="op">=</span>cfg.canopy.tree_height_threshold_m,</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>metrics[<span class="st">"shade_score"</span>] <span class="op">=</span> shade_score(metrics, cfg.score)</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>metrics[<span class="st">"shade_class"</span>] <span class="op">=</span> shade_class(metrics[<span class="st">"shade_score"</span>], cfg.score)</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>pd.Series(metrics).<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>ndvi_summer                  0.62146
+ndvi_winter                 0.726294
+ndvi_delta                 -0.104834
+tree_fraction               0.151751
+mean_canopy_height          1.748198
+shadow_frac_detected_djf    0.740741
+shadow_frac_detected_mam         0.0
+shadow_frac_detected_jja         0.0
+shadow_frac_detected_son    0.031746
+n_scenes_used                     40
+shadow_frac_modeled_12h     0.190469
+shadow_frac_modeled_15h     0.190736
+shade_score                 0.140893
+shade_class                     none
+dtype: object</code></pre>
+</div>
+</div>
+<div id="21" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:04.414652Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:04.414521Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:04.417337Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:04.417011Z&quot;}" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The score, written out by hand — same number as shade_score() above:</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> cfg.score</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>manual <span class="op">=</span> (</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    s.w_modeled_15h <span class="op">*</span> metrics[<span class="st">"shadow_frac_modeled_15h"</span>]</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> s.w_tree_fraction <span class="op">*</span> metrics[<span class="st">"tree_fraction"</span>]</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> s.w_detected_summer <span class="op">*</span> metrics[<span class="st">"shadow_frac_detected_jja"</span>]</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"manual: </span><span class="sc">{</span>manual<span class="sc">:.4f}</span><span class="ss">   shade_score(): </span><span class="sc">{</span>metrics[<span class="st">'shade_score'</span>]<span class="sc">:.4f}</span><span class="ss">"</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"   class: </span><span class="sc">{</span>metrics[<span class="st">'shade_class'</span>]<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>manual: 0.1409   shade_score(): 0.1409   class: none</code></pre>
+</div>
+</div>
+</section>
+<section id="step-7-the-product" class="level3">
+<h3 class="anchored" data-anchor-id="step-7-the-product">Step 7 — the product</h3>
+<p>In a batch run every stop becomes one row in a GeoDataFrame, written as <strong>GeoParquet</strong> (analysis), <strong>GeoPackage</strong> (GIS) and an interactive <strong>web map</strong> where each stop is coloured by its shade class. This is our single stop rendered exactly like the final map:</p>
+<div id="23" class="cell" data-execution="{&quot;iopub.execute_input&quot;:&quot;2026-07-15T06:39:04.418663Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-15T06:39:04.418490Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-15T06:39:04.430118Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-15T06:39:04.429714Z&quot;}" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shaduw_langs_de_snelweg.outputs <span class="im">import</span> CLASS_COLORS</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>color <span class="op">=</span> CLASS_COLORS[metrics[<span class="st">"shade_class"</span>]]</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> folium.Map(location<span class="op">=</span>[center.y, center.x], zoom_start<span class="op">=</span><span class="dv">16</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>folium.GeoJson(</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    stop.geometry.__geo_interface__,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    style_function<span class="op">=</span><span class="kw">lambda</span> f, c<span class="op">=</span>color: {<span class="st">"color"</span>: c, <span class="st">"fillColor"</span>: c, <span class="st">"fillOpacity"</span>: <span class="fl">0.35</span>},</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>).add_to(m)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>folium.CircleMarker(</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    location<span class="op">=</span>[center.y, center.x],</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    radius<span class="op">=</span><span class="dv">7</span>,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span>color,</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    fill<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    fill_opacity<span class="op">=</span><span class="fl">0.9</span>,</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    popup<span class="op">=</span>folium.Popup(</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"&lt;b&gt;</span><span class="sc">{</span>stop[<span class="st">'name'</span>]<span class="sc">}</span><span class="ss">&lt;/b&gt;&lt;br&gt;"</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"shade_score: </span><span class="sc">{</span>metrics[<span class="st">'shade_score'</span>]<span class="sc">:.3f}</span><span class="ss">&lt;br&gt;"</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"shade_class: </span><span class="sc">{</span>metrics[<span class="st">'shade_class'</span>]<span class="sc">}</span><span class="ss">&lt;br&gt;"</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"modelled 15h shadow: </span><span class="sc">{</span>metrics[<span class="st">'shadow_frac_modeled_15h'</span>]<span class="sc">:.3f}</span><span class="ss">&lt;br&gt;"</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"tree fraction: </span><span class="sc">{</span>metrics[<span class="st">'tree_fraction'</span>]<span class="sc">:.3f}</span><span class="ss">"</span>,</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>        max_width<span class="op">=</span><span class="dv">300</span>,</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>).add_to(m)</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>m</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div style="width:100%;"><div style="position:relative;width:100%;height:0;padding-bottom:60%;"><span style="color:#565656">Make this Notebook Trusted to load map: File -&gt; Trust Notebook</span><iframe srcdoc="<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=UTF-8&quot; />
+    <script src=&quot;https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js&quot;></script>
+    <script src=&quot;https://code.jquery.com/jquery-3.7.1.min.js&quot;></script>
+    <script src=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js&quot;></script>
+    <script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js&quot;></script>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css&quot;/>
+    
+            <meta name=&quot;viewport&quot; content=&quot;width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no&quot; />
+            <style>
+                #map_5c50679224dbab6d420bf424388fb05b {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class=&quot;folium-map&quot; id=&quot;map_5c50679224dbab6d420bf424388fb05b&quot; ></div>
+        
+</body>
+<script>
+    
+    
+            var map_5c50679224dbab6d420bf424388fb05b = L.map(
+                &quot;map_5c50679224dbab6d420bf424388fb05b&quot;,
+                {
+                    center: [52.16542915348158, 5.545690356519718],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  &quot;zoom&quot;: 16,
+  &quot;zoomControl&quot;: true,
+  &quot;preferCanvas&quot;: false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_1de24eb792a550cdabe038281d820abc = L.tileLayer(
+                &quot;https://tile.openstreetmap.org/{z}/{x}/{y}.png&quot;,
+                {
+  &quot;minZoom&quot;: 0,
+  &quot;maxZoom&quot;: 19,
+  &quot;maxNativeZoom&quot;: 19,
+  &quot;noWrap&quot;: false,
+  &quot;attribution&quot;: &quot;\u0026copy; \u003ca href=\&quot;https://www.openstreetmap.org/copyright\&quot;\u003eOpenStreetMap\u003c/a\u003e contributors&quot;,
+  &quot;subdomains&quot;: &quot;abc&quot;,
+  &quot;detectRetina&quot;: false,
+  &quot;tms&quot;: false,
+  &quot;opacity&quot;: 1,
+}
+
+            );
+        
+    
+            tile_layer_1de24eb792a550cdabe038281d820abc.addTo(map_5c50679224dbab6d420bf424388fb05b);
+        
+    
+        function geo_json_bf4049b0b80effdd5df8f9c0c2e968d1_styler(feature) {
+            switch(feature.id) {
+                default:
+                    return {&quot;color&quot;: &quot;#c62828&quot;, &quot;fillColor&quot;: &quot;#c62828&quot;, &quot;fillOpacity&quot;: 0.35};
+            }
+        }
+
+        function geo_json_bf4049b0b80effdd5df8f9c0c2e968d1_onEachFeature(feature, layer) {
+
+            layer.on({
+            });
+        };
+        var geo_json_bf4049b0b80effdd5df8f9c0c2e968d1 = L.geoJson(null, {
+                onEachFeature: geo_json_bf4049b0b80effdd5df8f9c0c2e968d1_onEachFeature,
+            
+                style: geo_json_bf4049b0b80effdd5df8f9c0c2e968d1_styler,
+            ...{
+}
+        });
+
+        function geo_json_bf4049b0b80effdd5df8f9c0c2e968d1_add (data) {
+            geo_json_bf4049b0b80effdd5df8f9c0c2e968d1
+                .addData(data);
+        }
+            geo_json_bf4049b0b80effdd5df8f9c0c2e968d1_add({&quot;features&quot;: [{&quot;geometry&quot;: {&quot;coordinates&quot;: [[[5.5435972, 52.1654281], [5.5465659, 52.1657864], [5.549282, 52.1658607], [5.5493165, 52.1657855], [5.5493399, 52.1657283], [5.5427814, 52.1648275], [5.542755, 52.1649002], [5.5427182, 52.1650051], [5.5435972, 52.1654281]]], &quot;type&quot;: &quot;Polygon&quot;}, &quot;id&quot;: &quot;0&quot;, &quot;type&quot;: &quot;Feature&quot;}], &quot;type&quot;: &quot;FeatureCollection&quot;});
+
+        
+    
+            geo_json_bf4049b0b80effdd5df8f9c0c2e968d1.addTo(map_5c50679224dbab6d420bf424388fb05b);
+        
+    
+            var circle_marker_f033fdb859c401e47b46c2ab820cf5ca = L.circleMarker(
+                [52.16542915348158, 5.545690356519718],
+                {&quot;bubblingMouseEvents&quot;: true, &quot;color&quot;: &quot;#c62828&quot;, &quot;dashArray&quot;: null, &quot;dashOffset&quot;: null, &quot;fill&quot;: true, &quot;fillColor&quot;: &quot;#c62828&quot;, &quot;fillOpacity&quot;: 0.9, &quot;fillRule&quot;: &quot;evenodd&quot;, &quot;lineCap&quot;: &quot;round&quot;, &quot;lineJoin&quot;: &quot;round&quot;, &quot;opacity&quot;: 1.0, &quot;radius&quot;: 7, &quot;stroke&quot;: true, &quot;weight&quot;: 3}
+            ).addTo(map_5c50679224dbab6d420bf424388fb05b);
+        
+    
+        var popup_e9a886a2f2d2de85cbce76f2efe4a4df = L.popup({
+  &quot;maxWidth&quot;: 300,
+});
+
+        
+            
+                var html_ca70a50625ecee09b2e3721639c05700 = $(`<div id=&quot;html_ca70a50625ecee09b2e3721639c05700&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;><b>Uilengoor (A1)</b><br>shade_score: 0.141<br>shade_class: none<br>modelled 15h shadow: 0.191<br>tree fraction: 0.152</div>`)[0];
+                popup_e9a886a2f2d2de85cbce76f2efe4a4df.setContent(html_ca70a50625ecee09b2e3721639c05700);
+            
+        
+
+        circle_marker_f033fdb859c401e47b46c2ab820cf5ca.bindPopup(popup_e9a886a2f2d2de85cbce76f2efe4a4df)
+        ;
+
+        
+    
+</script>
+</html>" style="position:absolute;width:100%;height:100%;left:0;top:0;border:none !important;" allowfullscreen="" webkitallowfullscreen="" mozallowfullscreen=""></iframe></div></div>
+</div>
+</div>
+</section>
+<section id="running-it-at-scale" class="level3">
+<h3 class="anchored" data-anchor-id="running-it-at-scale">Running it at scale</h3>
+<p>The batch pipeline is the same code in a loop, with two layers of on-disk caching (the prepared stop table and one JSON per finished stop), so interrupted runs resume where they left off and failed stops are retried on the next run:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run run        <span class="co"># 5 prototype stops</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run discover   <span class="co"># find all ~545 NL rest/service areas in OSM</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run run-full   <span class="co"># process all of them (8 parallel workers)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
