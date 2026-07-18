@@ -7,6 +7,7 @@ from pathlib import Path
 
 import folium
 import geopandas as gpd
+import pandas as pd
 
 from shaduw_langs_de_snelweg.config import OutputConfig
 
@@ -18,6 +19,18 @@ CLASS_COLORS = {
     "none": "#c62828",
     "unknown": "#9e9e9e",
 }
+
+
+def merge_results(paths: list[Path]) -> gpd.GeoDataFrame:
+    """Concatenate per-run result GeoParquets (e.g. one per country).
+
+    Later files win on duplicate ``stop_id`` values, so a re-processed
+    country can be merged over an older combined set.
+    """
+    frames = [gpd.read_parquet(p) for p in paths]
+    gdf = pd.concat(frames, ignore_index=True)
+    gdf = gdf.drop_duplicates(subset="stop_id", keep="last").reset_index(drop=True)
+    return gpd.GeoDataFrame(gdf, geometry="geometry", crs=frames[0].crs)
 
 
 def write_outputs(gdf: gpd.GeoDataFrame, cfg: OutputConfig) -> dict[str, Path]:

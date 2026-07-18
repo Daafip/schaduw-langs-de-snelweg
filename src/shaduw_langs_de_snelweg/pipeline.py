@@ -10,7 +10,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import logging
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import geopandas as gpd
 import pandas as pd
@@ -140,16 +140,24 @@ def run_pipeline(
             for row in tqdm(rows, desc="stops")
         ]
     else:
+        # as_completed (not pool.map) so the bar tracks real completions: map's
+        # iterator yields in submission order, so one slow/hung stop near the
+        # front stalls the count while other workers race ahead unseen.
+        results: list[dict | None] = [None] * len(rows)
+        errors = 0
         with ThreadPoolExecutor(max_workers=workers) as pool:
-            results = list(
-                tqdm(
-                    pool.map(
-                        lambda row: _stop_metrics_with_cache(row, cfg, force), rows
-                    ),
-                    total=len(rows),
-                    desc="stops",
-                )
-            )
+            futures = {
+                pool.submit(_stop_metrics_with_cache, row, cfg, force): i
+                for i, row in enumerate(rows)
+            }
+            with tqdm(total=len(rows), desc="stops") as bar:
+                for future in as_completed(futures):
+                    metrics = future.result()
+                    results[futures[future]] = metrics
+                    if "error" in metrics:
+                        errors += 1
+                    bar.set_postfix(errors=errors)
+                    bar.update(1)
 
     records = []
     for row, metrics in zip(rows, results):

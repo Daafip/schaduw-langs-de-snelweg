@@ -7,7 +7,7 @@ import xarray as xr
 from shapely.geometry import Point, box
 
 from shaduw_langs_de_snelweg.config import OutputConfig
-from shaduw_langs_de_snelweg.outputs import write_outputs
+from shaduw_langs_de_snelweg.outputs import merge_results, write_outputs
 from shaduw_langs_de_snelweg.shadow import modeled_shadow_fraction
 
 
@@ -47,6 +47,26 @@ def test_write_outputs_creates_all_files(tmp_path):
     gpkg = gpd.read_file(paths["geopackage"])
     assert "centroid_lon" in gpkg.columns
     assert "centroid" not in gpkg.columns
+
+
+def test_merge_results_concatenates_and_dedupes(tmp_path):
+    nl = sample_gdf()
+    de = sample_gdf()
+    de["stop_id"] = ["s2"]
+    de["country"] = ["DE"]
+    dupe = sample_gdf()  # same stop_id as nl, newer score: should win
+    dupe["shade_score"] = [0.99]
+
+    paths = []
+    for i, gdf in enumerate((nl, de, dupe)):
+        path = tmp_path / f"part{i}.parquet"
+        gdf.to_parquet(path)
+        paths.append(path)
+
+    merged = merge_results(paths)
+    assert sorted(merged["stop_id"]) == ["s1", "s2"]
+    assert merged.loc[merged["stop_id"] == "s1", "shade_score"].iloc[0] == 0.99
+    assert merged.crs is not None
 
 
 def make_chm(values):

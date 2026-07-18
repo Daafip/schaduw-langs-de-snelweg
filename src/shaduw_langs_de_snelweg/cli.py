@@ -35,6 +35,12 @@ def main(argv: list[str] | None = None) -> int:
     p_disc.add_argument("--country", required=True, help="ISO 3166-1 alpha-2, e.g. NL")
     p_disc.add_argument("--out", required=True, type=Path, help="output seed GeoJSON")
 
+    p_merge = sub.add_parser(
+        "merge", help="merge result GeoParquets (e.g. per country) into one output set"
+    )
+    p_merge.add_argument("inputs", nargs="+", type=Path, help="result parquet files")
+    p_merge.add_argument("--out", required=True, type=Path, help="output directory")
+
     args = parser.parse_args(argv)
     logging.basicConfig(
         level=logging.DEBUG if args.verbose else logging.INFO,
@@ -59,6 +65,15 @@ def main(argv: list[str] | None = None) -> int:
             ].to_string(index=False)
         )
         print(f"\n{len(gdf)} stops written to {cfg.output.directory}")
+        return 0
+
+    if args.command == "merge":
+        from shaduw_langs_de_snelweg.config import OutputConfig
+        from shaduw_langs_de_snelweg.outputs import merge_results, write_outputs
+
+        gdf = merge_results(args.inputs)
+        write_outputs(gdf, OutputConfig(directory=args.out))
+        print(f"{len(gdf)} stops merged into {args.out}")
         return 0
 
     if args.command == "discover":
