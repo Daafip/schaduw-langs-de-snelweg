@@ -16,9 +16,11 @@ install = "pre-commit install"
 run = "shaduw run --config configs/nl-prototype.toml"
 run-full = "shaduw run --config configs/nl-full.toml --workers 8"
 run-de = "shaduw run --config configs/de-full.toml --workers 8"
+run-fr = "shaduw run --config configs/fr-full.toml --workers 8"
 discover = "shaduw discover --country NL --out configs/seeds/nl-discovered.geojson"
 discover-de = "shaduw discover --country DE --out configs/seeds/de-discovered.geojson"
-merge-eu = "shaduw merge output/stops_shade.parquet output/de/stops_shade.parquet --out output/eu"
+discover-fr = "shaduw discover --country FR --out configs/seeds/fr-discovered.geojson"
+merge-eu = "shaduw merge output/stops_shade.parquet output/de/stops_shade.parquet output/fr/stops_shade.parquet --out output/eu"
 test = "pytest test -v"
 
 # Docs
