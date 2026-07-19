@@ -1,0 +1,49 @@
+# All Swiss rest/service areas discovered from OSM.
+# Regenerate the seed file with:  pixi run discover-ch
+# Run with:  pixi run run-ch
+# Relative paths resolve against this file's directory.
+
+name = "ch-full"
+country = "CH"
+cache_dir = "../cache"
+
+[stops]
+seed_path = "seeds/ch-discovered.geojson"
+parking_buffer_m = 75.0
+aoi_buffer_m = 30.0       # trees next to the parking cast shade onto it
+use_overpass = false      # discovered seeds are already polygons
+
+[stac]
+url = "https://earth-search.aws.element84.com/v1"   # no account needed
+collection = "sentinel-2-l2a"
+max_cloud_cover = 30.0
+years_back = 2
+resolution = 10.0
+max_items_per_season = 12
+
+[canopy]
+source = "meta"                 # Meta/WRI global canopy height, 1 m, AWS Open Data
+tree_height_threshold_m = 3.0
+resolution = 1.0
+
+[shadow]
+date = "06-21"        # summer solstice
+hours = [12, 15]      # local clock hours to model; 15h is the headline metric
+timezone = "Europe/Zurich"
+self_shade_height_m = 2.0
+
+[detection]
+brightness_threshold = 0.08   # (R+G+B+NIR)/4 below this = shadow (~10:30)
+
+[score]
+w_modeled_15h = 0.5
+w_tree_fraction = 0.3
+w_detected_summer = 0.2
+bound_partial = 0.15   # score below this -> "none"
+bound_good = 0.40      # score above this -> "good"
+
+[output]
+directory = "../output/ch"
+geoparquet = "stops_shade.parquet"
+geopackage = "stops_shade.gpkg"
+map_html = "stops_shade_map.html"
