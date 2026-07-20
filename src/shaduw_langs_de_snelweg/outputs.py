@@ -24,10 +24,20 @@ CLASS_COLORS = {
 def merge_results(paths: list[Path]) -> gpd.GeoDataFrame:
     """Concatenate per-run result GeoParquets (e.g. one per country).
 
+    Missing paths are skipped (logged), so a merge list can name every
+    country's output even when only some of them have been run so far.
     Later files win on duplicate ``stop_id`` values, so a re-processed
     country can be merged over an older combined set.
     """
-    frames = [gpd.read_parquet(p) for p in paths]
+    existing = []
+    for p in paths:
+        if p.exists():
+            existing.append(p)
+        else:
+            logger.warning("merge: skipping missing input %s", p)
+    if not existing:
+        raise ValueError(f"no input files exist among: {[str(p) for p in paths]}")
+    frames = [gpd.read_parquet(p) for p in existing]
     gdf = pd.concat(frames, ignore_index=True)
     gdf = gdf.drop_duplicates(subset="stop_id", keep="last").reset_index(drop=True)
     return gpd.GeoDataFrame(gdf, geometry="geometry", crs=frames[0].crs)

@@ -32,7 +32,7 @@ discover-es = "shaduw discover --country ES --out configs/seeds/es-discovered.ge
 discover-ch = "shaduw discover --country CH --out configs/seeds/ch-discovered.geojson"
 discover-it = "shaduw discover --country IT --out configs/seeds/it-discovered.geojson"
 discover-at = "shaduw discover --country AT --out configs/seeds/at-discovered.geojson"
-merge-eu = "shaduw merge output/stops_shade.parquet output/de/stops_shade.parquet output/fr/stops_shade.parquet --out output/eu"
+merge-eu = "shaduw merge output/stops_shade.parquet output/de/stops_shade.parquet output/fr/stops_shade.parquet output/be/stops_shade.parquet output/uk/stops_shade.parquet output/es/stops_shade.parquet output/ch/stops_shade.parquet output/it/stops_shade.parquet output/at/stops_shade.parquet --out output/eu"
 test = "pytest test -v"
 
 # Docs

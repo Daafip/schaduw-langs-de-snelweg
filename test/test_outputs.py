@@ -2,6 +2,7 @@ import datetime as dt
 
 import geopandas as gpd
 import numpy as np
+import pytest
 import rioxarray  # noqa: F401
 import xarray as xr
 from shapely.geometry import Point, box
@@ -67,6 +68,20 @@ def test_merge_results_concatenates_and_dedupes(tmp_path):
     assert sorted(merged["stop_id"]) == ["s1", "s2"]
     assert merged.loc[merged["stop_id"] == "s1", "shade_score"].iloc[0] == 0.99
     assert merged.crs is not None
+
+
+def test_merge_results_skips_missing_paths(tmp_path):
+    path = tmp_path / "part0.parquet"
+    sample_gdf().to_parquet(path)
+    not_yet_run = tmp_path / "part1.parquet"
+
+    merged = merge_results([path, not_yet_run])
+    assert sorted(merged["stop_id"]) == ["s1"]
+
+
+def test_merge_results_raises_if_all_paths_missing(tmp_path):
+    with pytest.raises(ValueError):
+        merge_results([tmp_path / "missing.parquet"])
 
 
 def make_chm(values):
