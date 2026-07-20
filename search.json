@@ -25,14 +25,14 @@
     "href": "reference/PipelineConfig.html",
     "title": "PipelineConfig",
     "section": "",
-    "text": "PipelineConfig()\nTop-level pipeline configuration (one TOML file).\n\n\n\n\n\nName\nDescription\n\n\n\n\ncache_dir\n\n\n\ncanopy\n\n\n\ncountry\n\n\n\ndetection\n\n\n\nname\n\n\n\noutput\n\n\n\nscore\n\n\n\nshadow\n\n\n\nstac\n\n\n\nstops"
+    "text": "PipelineConfig()\nTop-level pipeline configuration (one TOML file).\n\n\n\n\n\nName\nDescription\n\n\n\n\ncache_dir\n\n\n\ncanopy\n\n\n\ncountry\n\n\n\ndetection\n\n\n\nname\n\n\n\noutput\n\n\n\nroads_path\n\n\n\nscore\n\n\n\nshadow\n\n\n\nstac\n\n\n\nstops"
   },
   {
     "objectID": "reference/PipelineConfig.html#attributes",
     "href": "reference/PipelineConfig.html#attributes",
     "title": "PipelineConfig",
     "section": "",
-    "text": "Name\nDescription\n\n\n\n\ncache_dir\n\n\n\ncanopy\n\n\n\ncountry\n\n\n\ndetection\n\n\n\nname\n\n\n\noutput\n\n\n\nscore\n\n\n\nshadow\n\n\n\nstac\n\n\n\nstops"
+    "text": "Name\nDescription\n\n\n\n\ncache_dir\n\n\n\ncanopy\n\n\n\ncountry\n\n\n\ndetection\n\n\n\nname\n\n\n\noutput\n\n\n\nroads_path\n\n\n\nscore\n\n\n\nshadow\n\n\n\nstac\n\n\n\nstops"
   },
   {
     "objectID": "reference/load_config.html",
