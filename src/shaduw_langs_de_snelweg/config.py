@@ -187,6 +187,8 @@ class PipelineConfig(BaseModel):
     name: str = "shaduw-langs-de-snelweg"
     country: str = "NL"
     cache_dir: Path = Path("cache")
+    # static, pre-built via `shaduw fetch-roads`; loading it touches no network
+    roads_path: Path = Path("roads/eu-major-roads.geojson")
     stops: StopsConfig
     stac: StacConfig = Field(default_factory=StacConfig)
     canopy: CanopyConfig = Field(default_factory=CanopyConfig)
@@ -214,6 +216,7 @@ def load_config(path: str | Path) -> PipelineConfig:
 
     cfg.stops.seed_path = _abs(cfg.stops.seed_path)
     cfg.cache_dir = _abs(cfg.cache_dir)
+    cfg.roads_path = _abs(cfg.roads_path)
     cfg.output.directory = _abs(cfg.output.directory)
     if cfg.canopy.local_path is not None:
         cfg.canopy.local_path = _abs(cfg.canopy.local_path)

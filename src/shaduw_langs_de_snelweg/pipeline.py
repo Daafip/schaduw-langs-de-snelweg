@@ -181,5 +181,5 @@ def run_pipeline(
     utm = gdf.estimate_utm_crs()
     gdf["centroid"] = gdf.geometry.to_crs(utm).centroid.to_crs(gdf.crs)
     gdf["processed_at"] = pd.to_datetime(gdf["processed_at"])
-    write_outputs(gdf, cfg.output)
+    write_outputs(gdf, cfg.output, roads_path=cfg.roads_path)
     return gdf

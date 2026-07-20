@@ -5,10 +5,16 @@ import numpy as np
 import pytest
 import rioxarray  # noqa: F401
 import xarray as xr
-from shapely.geometry import Point, box
+from shapely.geometry import LineString, Point, box
 
 from shaduw_langs_de_snelweg.config import OutputConfig
-from shaduw_langs_de_snelweg.outputs import merge_results, write_outputs
+from shaduw_langs_de_snelweg.outputs import (
+    SCORE_COLOR_SCALE,
+    _score_color,
+    merge_results,
+    write_map,
+    write_outputs,
+)
 from shaduw_langs_de_snelweg.shadow import modeled_shadow_fraction
 
 
@@ -82,6 +88,96 @@ def test_merge_results_skips_missing_paths(tmp_path):
 def test_merge_results_raises_if_all_paths_missing(tmp_path):
     with pytest.raises(ValueError):
         merge_results([tmp_path / "missing.parquet"])
+
+
+def test_write_outputs_embeds_static_roads_overlay(tmp_path):
+    roads_path = tmp_path / "eu-major-roads.geojson"
+    roads = gpd.GeoDataFrame(
+        {"ref": ["A1"], "geometry": [LineString([(5.0, 52.0), (5.1, 52.1)])]},
+        crs="EPSG:4326",
+    )
+    roads.to_file(roads_path, driver="GeoJSON")
+
+    cfg = OutputConfig(directory=tmp_path / "out")
+    paths = write_outputs(sample_gdf(), cfg, roads_path=roads_path)
+
+    html = paths["map"].read_text()
+    assert "Road:" in html
+    assert "A1" in html
+
+
+def test_write_outputs_without_roads_path_has_no_overlay(tmp_path):
+    cfg = OutputConfig(directory=tmp_path)
+    paths = write_outputs(sample_gdf(), cfg)  # roads_path defaults to None
+    assert "Road:" not in paths["map"].read_text()
+
+
+def test_score_color_has_five_distinct_buckets():
+    assert len(SCORE_COLOR_SCALE) == 5
+    assert len({color for _, color in SCORE_COLOR_SCALE}) == 5
+
+
+def test_score_color_is_monotonic_low_to_high():
+    samples = [0.0, 0.15, 0.25, 0.40, 0.60]
+    colors = [_score_color(s) for s in samples]
+    # each successive bucket should differ (score strictly increases across bins)
+    assert len(set(colors)) == len(samples)
+
+
+def test_score_color_falls_back_for_missing_score():
+    assert _score_color(None) == "#9e9e9e"
+    assert _score_color(float("nan")) == "#9e9e9e"
+
+
+def multi_stop_gdf():
+    rows = []
+    for i, (stop_id, score) in enumerate([("bad", 0.02), ("mid", 0.30), ("best", 0.90)]):
+        poly = box(5.0 + i * 0.01, 52.0, 5.001 + i * 0.01, 52.001)
+        rows.append(
+            {
+                "stop_id": stop_id,
+                "name": stop_id,
+                "country": "NL",
+                "shade_score": score,
+                "shade_class": "unknown",
+                "shadow_frac_modeled_15h": 0.0,
+                "tree_fraction": 0.0,
+                "ndvi_summer": 0.0,
+                "n_scenes_used": 1,
+                "processed_at": dt.datetime.now(dt.timezone.utc),
+                "geometry": poly,
+            }
+        )
+    gdf = gpd.GeoDataFrame(rows, geometry="geometry", crs="EPSG:4326")
+    gdf["centroid"] = gdf.geometry.centroid
+    return gdf
+
+
+def test_write_map_draws_best_stop_last_so_it_stays_on_top(tmp_path):
+    # deliberately unsorted input: "best" (highest score) comes first
+    gdf = multi_stop_gdf().iloc[[2, 0, 1]].reset_index(drop=True)
+    path = tmp_path / "map.html"
+    write_map(gdf, path)
+
+    html = path.read_text()
+    positions = {
+        stop_id: html.index(f"stop_id</b>: {stop_id}") for stop_id in ("bad", "mid", "best")
+    }
+    assert positions["bad"] < positions["mid"] < positions["best"]
+
+
+def test_write_map_roads_are_on_a_pane_behind_stops(tmp_path):
+    roads = gpd.GeoDataFrame(
+        {"ref": ["A1"], "geometry": [LineString([(5.0, 52.0), (5.1, 52.1)])]},
+        crs="EPSG:4326",
+    )
+    path = tmp_path / "map.html"
+    write_map(sample_gdf(), path, roads=roads)
+
+    html = path.read_text()
+    assert "createPane" in html
+    assert '"pane": "roads"' in html
+    assert "preferCanvas" in html
 
 
 def make_chm(values):

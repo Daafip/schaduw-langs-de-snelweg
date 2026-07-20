@@ -37,10 +37,20 @@ OVERPASS_HEADERS = {
 }
 
 
+#: fallback wait (seconds) on a 429 with no Retry-After header
+DEFAULT_RATE_LIMIT_WAIT_S = 60
+
+
 def overpass_query(
     query: str, primary_url: str, timeout: int, retries: int = 2
 ) -> dict:
-    """POST an Overpass QL query, retrying across mirrors on failure."""
+    """POST an Overpass QL query, retrying across mirrors on failure.
+
+    A 429 (Too Many Requests) backs off for the server's requested
+    ``Retry-After`` before trying the next mirror, instead of hammering it
+    again immediately — heavy continent-scale queries (e.g. a country's
+    full motorway network) are the ones that tend to trip this.
+    """
     urls = [primary_url] + [u for u in OVERPASS_MIRRORS if u != primary_url]
     last_error: Exception | None = None
     for attempt in range(retries):
@@ -57,6 +67,13 @@ def overpass_query(
             except (requests.RequestException, ValueError) as exc:
                 last_error = exc
                 logger.warning("Overpass request to %s failed: %s", url, exc)
+                response = getattr(exc, "response", None)
+                if response is not None and response.status_code == 429:
+                    wait = int(
+                        response.headers.get("Retry-After", DEFAULT_RATE_LIMIT_WAIT_S)
+                    )
+                    logger.warning("rate limited by %s; waiting %ds", url, wait)
+                    time.sleep(wait)
         time.sleep(5 * (attempt + 1))
     raise RuntimeError(f"all Overpass endpoints failed: {last_error}")
 

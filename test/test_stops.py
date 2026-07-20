@@ -3,12 +3,15 @@ import math
 
 import geopandas as gpd
 import pytest
+import requests
 from shapely.geometry import Point
 
+from shaduw_langs_de_snelweg import stops as stops_module
 from shaduw_langs_de_snelweg.stops import (
     buffer_in_meters,
     load_seeds,
     osm_elements_to_polygons,
+    overpass_query,
 )
 
 
@@ -89,3 +92,54 @@ def test_repo_seed_file_loads():
     gdf = load_seeds(seed)
     assert len(gdf) == 5
     assert gdf["stop_id"].is_unique
+
+
+class _FakeResponse:
+    def __init__(self, status_code, headers=None, json_data=None):
+        self.status_code = status_code
+        self.headers = headers or {}
+        self._json_data = json_data
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise requests.exceptions.HTTPError(f"{self.status_code} error", response=self)
+
+    def json(self):
+        return self._json_data
+
+
+def test_overpass_query_backs_off_on_429_retry_after(monkeypatch):
+    responses = [
+        _FakeResponse(429, headers={"Retry-After": "17"}),
+        _FakeResponse(200, json_data={"elements": []}),
+    ]
+
+    def fake_post(url, data, headers, timeout):
+        return responses.pop(0)
+
+    sleeps = []
+    monkeypatch.setattr(stops_module.requests, "post", fake_post)
+    monkeypatch.setattr(stops_module.time, "sleep", lambda s: sleeps.append(s))
+
+    result = overpass_query("[out:json];", "https://overpass.kumi.systems/api/interpreter", 60)
+
+    assert result == {"elements": []}
+    assert 17 in sleeps  # honoured the server's Retry-After, not just a fixed backoff
+
+
+def test_overpass_query_defaults_wait_when_no_retry_after(monkeypatch):
+    responses = [
+        _FakeResponse(429),  # no Retry-After header
+        _FakeResponse(200, json_data={"elements": []}),
+    ]
+
+    def fake_post(url, data, headers, timeout):
+        return responses.pop(0)
+
+    sleeps = []
+    monkeypatch.setattr(stops_module.requests, "post", fake_post)
+    monkeypatch.setattr(stops_module.time, "sleep", lambda s: sleeps.append(s))
+
+    overpass_query("[out:json];", "https://overpass.kumi.systems/api/interpreter", 60)
+
+    assert stops_module.DEFAULT_RATE_LIMIT_WAIT_S in sleeps

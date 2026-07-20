@@ -40,6 +40,32 @@ def main(argv: list[str] | None = None) -> int:
     )
     p_merge.add_argument("inputs", nargs="+", type=Path, help="result parquet files")
     p_merge.add_argument("--out", required=True, type=Path, help="output directory")
+    p_merge.add_argument(
+        "--roads-path",
+        type=Path,
+        default=Path("configs/roads/eu-major-roads.geojson"),
+        help="static major-roads GeoJSON for the map overlay (see 'shaduw fetch-roads')",
+    )
+
+    p_roads = sub.add_parser(
+        "fetch-roads",
+        help="(re)build the static major-roads map overlay via Overpass",
+    )
+    p_roads.add_argument(
+        "--countries", required=True, nargs="+", help="ISO 3166-1 alpha-2 codes, e.g. NL DE FR"
+    )
+    p_roads.add_argument(
+        "--out",
+        type=Path,
+        default=Path("configs/roads/eu-major-roads.geojson"),
+        help="output GeoJSON (loaded by 'run'/'merge' at map-render time)",
+    )
+    p_roads.add_argument(
+        "--cache-dir",
+        type=Path,
+        default=Path("cache"),
+        help="per-country cache so a rebuild only re-fetches new countries",
+    )
 
     args = parser.parse_args(argv)
     logging.basicConfig(
@@ -72,7 +98,7 @@ def main(argv: list[str] | None = None) -> int:
         from shaduw_langs_de_snelweg.outputs import merge_results, write_outputs
 
         gdf = merge_results(args.inputs)
-        write_outputs(gdf, OutputConfig(directory=args.out))
+        write_outputs(gdf, OutputConfig(directory=args.out), roads_path=args.roads_path)
         print(f"{len(gdf)} stops merged into {args.out}")
         return 0
 
@@ -83,6 +109,13 @@ def main(argv: list[str] | None = None) -> int:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         gdf.to_file(args.out, driver="GeoJSON")
         print(f"{len(gdf)} stops discovered in {args.country} -> {args.out}")
+        return 0
+
+    if args.command == "fetch-roads":
+        from shaduw_langs_de_snelweg.roads import build_major_roads_dataset
+
+        gdf = build_major_roads_dataset(args.countries, args.cache_dir, args.out)
+        print(f"{len(gdf)} major-road routes written to {args.out}")
         return 0
 
     return 1
