@@ -33,7 +33,7 @@ OVERPASS_MIRRORS = [
 
 #: overpass-api.de rejects the default python-requests agent with HTTP 406.
 OVERPASS_HEADERS = {
-    "User-Agent": "shaduw-langs-de-snelweg/0.1 (github.com/HKV-products-services)"
+    "User-Agent": "shaduw-langs-de-snelweg/0.1 (github.com/daafip)"
 }
 
 

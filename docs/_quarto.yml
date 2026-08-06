@@ -15,7 +15,7 @@ website:
       file: reference/index.qmd
     right:
     - icon: github
-      href: https://github.com/HKV-products-services/shaduw-langs-de-snelweg
+      href: https://github.com/daafip/shaduw-langs-de-snelweg
       aria-label: GitHub
 format:
   html:

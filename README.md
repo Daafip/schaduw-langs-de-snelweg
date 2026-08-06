@@ -76,5 +76,4 @@ pixi run pre-commit  # lint
 pixi run docs        # quarto docs preview
 ```
 
-Developed by HKV, published under the GNU GPL-3 license. Questions:
-`haasnoot@hkv.nl`.
+Developed by David Haasnoot, published under the GNU GPL-3 license.

@@ -6,7 +6,7 @@ Shade detection at roadside stops (EU) from open satellite data. For a set of
 stopping places along highways (rest areas, service stations, parkings) the
 pipeline estimates **how shaded each stop is**, including seasonal variation,
 using only openly available data: Sentinel-2 imagery, the ETH global canopy
-height model and OpenStreetMap. Developed by HKV, published under GNU GPL-3.
+height model and OpenStreetMap. Developed by David Haasnoot, published under GNU GPL-3.
 
 See the plan (`shade-detection-pipeline-plan.md`) for the full design, and the
 API reference for the pipeline modules.

@@ -39,4 +39,4 @@ dependencies = [
 shaduw = "shaduw_langs_de_snelweg.cli:main"
 
 [project.urls]
-Source = "https://github.com/HKV-products-services/shaduw-langs-de-snelweg"
+Source = "https://github.com/daafip/shaduw-langs-de-snelweg"
