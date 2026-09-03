@@ -33,6 +33,7 @@ dependencies = [
   "pyarrow",
   "requests",
   "tqdm",
+  "python-dotenv",
 ]
 
 [project.scripts]

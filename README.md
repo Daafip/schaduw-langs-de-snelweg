@@ -68,6 +68,17 @@ One row per stop: `stop_id`, `name`, `country`, `geometry` (parking polygon),
 - Winter composites can be thin in NW Europe; check `n_scenes_used`.
 - Buildings/carports also give shade but are not in canopy models (yet).
 
+## Configuration
+
+The quick-look Folium map (`outputs.map_html`) uses CartoDB basemap tiles.
+They work fine unauthenticated, but you can raise the rate limit with a
+[CARTO API key](https://carto.com/basemaps):
+
+- Locally, copy `.env.example` to `.env` and set `CARTO_API_KEY` — it's
+  loaded automatically and never committed (`.env` is gitignored).
+- In GitHub Actions, set a `CARTO_API_KEY` repository secret; workflows that
+  build the map pass it through as an environment variable.
+
 ## Development
 
 ```bash

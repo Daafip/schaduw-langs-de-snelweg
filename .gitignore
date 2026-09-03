@@ -20,3 +20,5 @@ docs/reference
 # pipeline artefacts
 /cache
 /output
+# local secrets
+.env

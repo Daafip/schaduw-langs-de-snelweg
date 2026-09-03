@@ -85,6 +85,7 @@ tqdm = "*"
 # Geo / pipeline stack
 geopandas = ">=1.0"
 shapely = ">=2.0"
+python-dotenv = "*"
 rioxarray = "*"
 rasterio = "*"
 xarray = "*"

@@ -3,16 +3,46 @@
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 
 import folium
 import geopandas as gpd
 import pandas as pd
+from dotenv import load_dotenv
 
 from shaduw_langs_de_snelweg.config import OutputConfig
 from shaduw_langs_de_snelweg.roads import load_major_roads
 
+# Loads variables from a local ``.env`` file (if present) into the process
+# environment without overriding anything already set (e.g. by CI secrets).
+load_dotenv()
+
 logger = logging.getLogger(__name__)
+
+#: CartoDB basemap tile template + attribution (mirrors the "CartoDB positron"
+#: provider folium ships with), used instead of the named tile string so we
+#: can append an API key. Get one at https://carto.com/basemaps and set it as
+#: the ``CARTO_API_KEY`` environment variable (locally via a ``.env`` file,
+#: in CI via a repository secret) to raise CARTO's anonymous rate limits.
+CARTO_TILE_URL = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+CARTO_ATTR = (
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> '
+    'contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+)
+
+
+def _carto_tiles() -> tuple[str, str | None]:
+    """CartoDB positron tiles, keyed with ``CARTO_API_KEY`` if set.
+
+    Falls back to folium's built-in (unauthenticated) "CartoDB positron"
+    provider when no key is configured, keeping current behaviour for
+    contributors who haven't set one up.
+    """
+    api_key = os.environ.get("CARTO_API_KEY")
+    if not api_key:
+        return "CartoDB positron", None
+    return f"{CARTO_TILE_URL}?key={api_key}", CARTO_ATTR
 
 #: kept for callers that key off the stored 3-class ``shade_class`` field
 #: (e.g. the introduction notebook plots a single stop at a time).
@@ -122,6 +152,7 @@ def write_map(
         centroids = gpd.GeoSeries(gdf["centroid"], crs=gdf.crs)
     else:
         centroids = gdf.geometry.to_crs(gdf.estimate_utm_crs()).centroid.to_crs(gdf.crs)
+    tiles, attr = _carto_tiles()
     m = folium.Map(
         location=[centroids.y.mean(), centroids.x.mean()],
         zoom_start=8,
@@ -129,7 +160,8 @@ def write_map(
         # file:// pages don't send, so its tiles fail to load with a
         # "referer is required" error tile when the map HTML is opened
         # directly from disk. CartoDB's tiles don't have that requirement.
-        tiles="CartoDB positron",
+        tiles=tiles,
+        attr=attr,
         prefer_canvas=True,
     )
     if roads is not None and not roads.empty:

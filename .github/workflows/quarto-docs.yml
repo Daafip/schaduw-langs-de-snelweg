@@ -38,6 +38,8 @@ jobs:
       - name: Render Quarto Project
         working-directory: shaduw-langs-de-snelweg
         run: pixi run quarto-render
+        env:
+          CARTO_API_KEY: ${{ secrets.CARTO_API_KEY }}
 
       - name: Publish Quarto Project
         if: github.ref == 'refs/heads/main'
